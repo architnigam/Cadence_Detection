@@ -78,6 +78,39 @@ class TestEmailPositive(unittest.TestCase):
         emails = [f for f in findings if f.entity_type == "EMAIL"]
         self.assertEqual(len(emails), 2)
 
+    def test_supported_special_characters_and_subdomain_span(self):
+        text = "Route: synth.user+tag%dev@example.sub.example.org"
+        blk = _make_block(text)
+        emails = [f for f in detect(blk) if f.entity_type == "EMAIL"]
+
+        self.assertEqual(len(emails), 1)
+        self.assertEqual(text[emails[0].start:emails[0].end], "synth.user+tag%dev@example.sub.example.org")
+
+    def test_email_adjacent_to_punctuation_and_brackets(self):
+        text = "(synth.one@example.org), [synth-two@example.net]."
+        blk = _make_block(text)
+        emails = [f for f in detect(blk) if f.entity_type == "EMAIL"]
+
+        self.assertEqual(
+            [text[f.start:f.end] for f in emails],
+            ["synth.one@example.org", "synth-two@example.net"],
+        )
+
+    def test_every_positive_email_has_exact_exclusive_end_offset(self):
+        text = "a@example.com; synth+tag@example.co.uk, x_y%z@example-domain.test!"
+        blk = _make_block(text)
+        emails = [f for f in detect(blk) if f.entity_type == "EMAIL"]
+        expected = [
+            "a@example.com",
+            "synth+tag@example.co.uk",
+            "x_y%z@example-domain.test",
+        ]
+
+        self.assertEqual(len(emails), len(expected))
+        for finding, expected_span in zip(emails, expected):
+            self.assertEqual(text[finding.start:finding.end], expected_span)
+            self.assertEqual(finding.end, finding.start + len(expected_span))
+
     def test_confidence_range(self):
         blk = _make_block("x@example.com")
         findings = detect(blk)
@@ -120,6 +153,22 @@ class TestEmailNegative(unittest.TestCase):
         findings = detect(blk)
         emails = [f for f in findings if f.entity_type == "EMAIL"]
         self.assertEqual(len(emails), 0)
+
+    def test_incomplete_email_like_strings(self):
+        for text in (
+            "synth@ example.com",
+            "user@example.",
+            "user@",
+        ):
+            with self.subTest(text=text):
+                emails = [f for f in detect(_make_block(text)) if f.entity_type == "EMAIL"]
+                self.assertEqual(emails, [])
+
+    def test_ordinary_text_and_bare_domain_are_not_emails(self):
+        text = "Contact support at example dot com; website example.org; use @ as a symbol."
+        emails = [f for f in detect(_make_block(text)) if f.entity_type == "EMAIL"]
+
+        self.assertEqual(emails, [])
 
 
 # 3. PHONE – contextual positive cases
