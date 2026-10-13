@@ -7,6 +7,8 @@ Entity types detected:
     EMAIL        – Conservative local@domain.tld pattern.
     PHONE        – Requires a context keyword (Tel, Mobile, Phone, M, …).
                    Confidence scores are heuristic, not calibrated probabilities.
+    PERSON       – Label-gated synthetic name pattern for "Name:" and
+                   "Employee Name:" fields.
     EMPLOYEE_ID  – Synthetic EMP-<digits> fixture only.  NOT an official Cadence
                    identifier; replace before production use.
 
@@ -92,6 +94,15 @@ _PHONE_PATTERN = re.compile(
     re.IGNORECASE | re.UNICODE,
 )
 _DATE_LIKE_PHONE = re.compile(r"\d{4}[-/.]\d{1,2}[-/.]\d{1,2}")
+
+# PERSON: contextual only. The value is validated after matching so ordinary
+# capitalized prose and unlabeled organization names are not treated as names.
+_NAME_PATTERN = re.compile(
+    r"(?i)(?<![\w])(?:employee\s+name|name)\s*:\s*"
+    r"([^\W\d_']+(?:-[^\W\d_']+)*(?:\s+[^\W\d_']+(?:-[^\W\d_']+)*){1,3})"
+    r"(?![\w])",
+    re.UNICODE,
+)
 
 # EMPLOYEE_ID: synthetic EMP-<digits> test fixture only – NOT an official identifier.
 _EMP_ID_PATTERN = re.compile(
@@ -204,6 +215,25 @@ def detect(block: Block) -> list[Finding]:
                 block_id=block.block_id,
                 entity_type="PHONE",
                 confidence=0.85,
+                span_group=1,
+            )
+        )
+
+    # PERSON – span_group=1 captures the labeled name, excluding the label.
+    for m in _NAME_PATTERN.finditer(block.text):
+        start, end = m.span(1)
+        name_text = block.text[start:end]
+        name_tokens = name_text.split()
+        name_parts = [part for token in name_tokens for part in token.split("-")]
+        if not all(part[0].isupper() and len(part) > 1 for part in name_parts):
+            continue
+        raw.append(
+            _match_to_finding(
+                m,
+                document_id=block.document_id,
+                block_id=block.block_id,
+                entity_type="PERSON",
+                confidence=0.90,
                 span_group=1,
             )
         )

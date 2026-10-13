@@ -278,7 +278,91 @@ class TestPhoneNegative(unittest.TestCase):
         self.assertEqual(len(phones), 0)
 
 
-# 5. EMPLOYEE_ID – synthetic positive cases
+# 5. PERSON – contextual positive cases
+
+class TestPersonContextualPositive(unittest.TestCase):
+
+    def test_name_label_detects_name_without_label_in_span(self):
+        text = "Name: Alex Morgan"
+        people = [f for f in detect(_make_block(text)) if f.entity_type == "PERSON"]
+
+        self.assertEqual(len(people), 1)
+        self.assertEqual(text[people[0].start:people[0].end], "Alex Morgan")
+
+    def test_employee_name_label_detects_hyphenated_name(self):
+        text = "Employee Name: Jamie Lee-Synthetic"
+        people = [f for f in detect(_make_block(text)) if f.entity_type == "PERSON"]
+
+        self.assertEqual(len(people), 1)
+        finding = people[0]
+        self.assertEqual(text[finding.start:finding.end], "Jamie Lee-Synthetic")
+        self.assertEqual(finding.entity_type, "PERSON")
+        self.assertEqual(finding.confidence, 0.90)
+        self.assertEqual(finding.detector, DETECTOR_ID)
+
+    def test_name_span_has_exact_end_before_punctuation(self):
+        text = "Name: Alex Morgan, reviewer"
+        people = [f for f in detect(_make_block(text)) if f.entity_type == "PERSON"]
+
+        self.assertEqual(len(people), 1)
+        self.assertEqual(text[people[0].start:people[0].end], "Alex Morgan")
+        self.assertEqual(people[0].end, text.index("Alex Morgan") + len("Alex Morgan"))
+
+    def test_name_metadata_and_source_location(self):
+        text = "Employee Name: Alex Morgan"
+        finding = next(
+            f for f in detect(Block("doc-person", "block-person", text))
+            if f.entity_type == "PERSON"
+        )
+
+        self.assertEqual(finding.document_id, "doc-person")
+        self.assertEqual(finding.block_id, "block-person")
+        self.assertEqual(
+            finding.source_location,
+            f"block-person:{finding.start}:{finding.end}",
+        )
+
+    def test_name_after_unicode_prefix_uses_code_point_offsets(self):
+        prefix = "café — 中文 "
+        text = prefix + "Name: Alex Morgan"
+        finding = next(
+            f for f in detect(_make_block(text))
+            if f.entity_type == "PERSON"
+        )
+
+        expected = "Alex Morgan"
+        self.assertEqual(finding.start, text.index(expected))
+        self.assertEqual(finding.end, finding.start + len(expected))
+        self.assertEqual(text[finding.start:finding.end], expected)
+
+
+# 6. PERSON – contextual negative cases
+
+class TestPersonContextualNegative(unittest.TestCase):
+
+    def test_unlabeled_capitalized_words_are_not_names(self):
+        text = "Cadence Detection Review"
+        people = [f for f in detect(_make_block(text)) if f.entity_type == "PERSON"]
+        self.assertEqual(people, [])
+
+    def test_initials_only_are_not_detected_without_documented_support(self):
+        text = "Name: A. B."
+        people = [f for f in detect(_make_block(text)) if f.entity_type == "PERSON"]
+        self.assertEqual(people, [])
+
+    def test_lowercase_labeled_value_is_not_detected(self):
+        text = "Name: alex morgan"
+        people = [f for f in detect(_make_block(text)) if f.entity_type == "PERSON"]
+        self.assertEqual(people, [])
+
+    def test_non_name_labeled_values_are_not_detected(self):
+        for text in ("Name: 12345", "Employee Name: Operations"):
+            with self.subTest(text=text):
+                people = [f for f in detect(_make_block(text)) if f.entity_type == "PERSON"]
+                self.assertEqual(people, [])
+
+
+# 7. EMPLOYEE_ID – synthetic positive cases
 
 class TestEmployeeIdPositive(unittest.TestCase):
     """Synthetic EMP-<digits> convention for test fixtures only."""
@@ -318,7 +402,7 @@ class TestEmployeeIdPositive(unittest.TestCase):
         self.assertEqual(empids[0].start, 0)
 
 
-# 6. EMPLOYEE_ID – negative cases
+# 8. EMPLOYEE_ID – negative cases
 
 class TestEmployeeIdNegative(unittest.TestCase):
 
@@ -373,7 +457,7 @@ class TestEmployeeIdNegative(unittest.TestCase):
         self.assertEqual(len(empids), 0)
 
 
-# 7. Unicode offsets
+# 9. Unicode offsets
 
 class TestUnicodeOffsets(unittest.TestCase):
 
@@ -425,7 +509,7 @@ class TestUnicodeOffsets(unittest.TestCase):
         self.assertGreaterEqual(digit_count, 7)
 
 
-# 8. Repeated findings (same entity appearing twice)
+# 10. Repeated findings (same entity appearing twice)
 
 class TestRepeatedFindings(unittest.TestCase):
 
@@ -460,7 +544,7 @@ class TestRepeatedFindings(unittest.TestCase):
         self.assertEqual(len(empids), 2)
 
 
-# 9. Overlap resolution
+# 11. Overlap resolution
 
 class TestOverlapResolution(unittest.TestCase):
 
@@ -528,7 +612,7 @@ class TestOverlapResolution(unittest.TestCase):
         self.assertLess(result[0].start, result[1].start)
 
 
-# 10. Source metadata correctness
+# 12. Source metadata correctness
 
 class TestSourceMetadata(unittest.TestCase):
 
@@ -563,7 +647,7 @@ class TestSourceMetadata(unittest.TestCase):
         self.assertEqual(f.source_location, expected)
 
 
-# 11. Finding contract and deterministic result behavior
+# 13. Finding contract and deterministic result behavior
 
 class TestFindingContract(unittest.TestCase):
 
@@ -649,7 +733,7 @@ class TestFindingContract(unittest.TestCase):
         self.assertEqual(len(keys), len(set(keys)))
 
 
-# 12. Edge cases: empty / whitespace input
+# 14. Edge cases: empty / whitespace input
 
 class TestEdgeCases(unittest.TestCase):
 
@@ -687,7 +771,7 @@ class TestEdgeCases(unittest.TestCase):
 
 
 
-# 13. Phone – M-label (abbreviated mobile keyword) — G1
+# 15. Phone – M-label (abbreviated mobile keyword) — G1
 
 class TestPhoneMAbbreviation(unittest.TestCase):
     """Single-letter 'M' mobile label; uppercase only (see PHONE/FP-2)."""
@@ -743,7 +827,7 @@ class TestPhoneMAbbreviation(unittest.TestCase):
         self.assertEqual(len(phones), 0)
 
 
-# 14. Phone – complete span with parentheses and plus-sign — G2, G3
+# 16. Phone – complete span with parentheses and plus-sign — G2, G3
 
 class TestPhoneCompleteSpan(unittest.TestCase):
     """Verify phone span includes +, parens, and spaces, and excludes the keyword."""
@@ -815,7 +899,7 @@ class TestPhoneCompleteSpan(unittest.TestCase):
         self.assertNotIn("Phone", sliced)
 
 
-# 15. Phone – false-positive regressions — G4, G5
+# 17. Phone – false-positive regressions — G4, G5
 
 class TestPhoneFalsePositiveRegressions(unittest.TestCase):
     """Verify numeric strings without phone keywords do not produce PHONE findings."""
@@ -870,7 +954,7 @@ class TestPhoneFalsePositiveRegressions(unittest.TestCase):
         self.assertEqual(text[phones[0].start:phones[0].end], "2468")
 
 
-# 16. Employee-ID – end-of-string and boundary — G6
+# 18. Employee-ID – end-of-string and boundary — G6
 
 class TestEmployeeIdBoundary(unittest.TestCase):
 
@@ -922,7 +1006,7 @@ class TestEmployeeIdBoundary(unittest.TestCase):
         )
 
 
-# 17. Unicode offsets – extended coverage for new phone formats
+# 19. Unicode offsets – extended coverage for new phone formats
 
 class TestUnicodeOffsetsExtended(unittest.TestCase):
 
