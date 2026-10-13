@@ -1,5 +1,5 @@
-# src/cadence_detection/redaction
+# Redaction Engine & Safe-Release Gate
 
-Person 4: text masking and safe output gate.
+Text masking, stable placeholder tokenization, and safe-release verification gate before downstream LLM processing.
 
-Status: scaffold; implementation pending.
+Status: Implemented and tested.

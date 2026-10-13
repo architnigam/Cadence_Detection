@@ -1,0 +1,576 @@
+{
+  "schema_version": 1,
+  "dataset_kind": "synthetic",
+  "split": "held_out",
+  "provisional_labels_included": false,
+  "evaluation_status": "evaluated",
+  "scope": {
+    "selected_documents": 3,
+    "evaluated_blocks": 6,
+    "excluded_unadjudicated_blocks": 0,
+    "excluded_predictions": 0,
+    "negative_blocks": 1
+  },
+  "exact_text": {
+    "tp": 16,
+    "fp": 3,
+    "fn": 2,
+    "gold_occurrences": 18,
+    "predicted_occurrences": 19,
+    "precision": 0.8421052631578947,
+    "recall": 0.8888888888888888,
+    "f1": 0.8648648648648649
+  },
+  "exact_text_errors": {
+    "false_negatives": [
+      {
+        "document_id": "syn_pdf",
+        "block_id": "narrative",
+        "entity_type": "PASSPORT",
+        "start": 225,
+        "end": 234,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "narrative",
+        "image_only": true
+      },
+      {
+        "document_id": "syn_pptx",
+        "block_id": "contacts",
+        "entity_type": "PERSON",
+        "start": 0,
+        "end": 11,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "table",
+        "image_only": false
+      }
+    ],
+    "false_positives": [
+      {
+        "document_id": "syn_docx",
+        "block_id": "negative",
+        "entity_type": "PERSON",
+        "start": 0,
+        "end": 8,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "body",
+        "image_only": false
+      },
+      {
+        "document_id": "syn_pptx",
+        "block_id": "contacts",
+        "entity_type": "EMAIL",
+        "start": 32,
+        "end": 51,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "table",
+        "image_only": false
+      },
+      {
+        "document_id": "syn_pptx",
+        "block_id": "contacts",
+        "entity_type": "PERSON",
+        "start": 0,
+        "end": 10,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "table",
+        "image_only": false
+      }
+    ]
+  },
+  "overlap_text_diagnostic": {
+    "tp": 17,
+    "fp": 2,
+    "fn": 1,
+    "gold_occurrences": 18,
+    "predicted_occurrences": 19,
+    "precision": 0.8947368421052632,
+    "recall": 0.9444444444444444,
+    "f1": 0.918918918918919,
+    "iou_threshold": 0.5
+  },
+  "visual_region_detection": {
+    "tp": 1,
+    "fp": 0,
+    "fn": 1,
+    "gold_occurrences": 2,
+    "predicted_occurrences": 1,
+    "precision": 1.0,
+    "recall": 0.5,
+    "f1": 0.6666666666666666,
+    "iou_threshold": 0.5
+  },
+  "by_category": {
+    "BANK_ACCOUNT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DATE_OF_BIRTH": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "DIRECTOR_ID": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "EMAIL": {
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "gold_occurrences": 2,
+      "predicted_occurrences": 3,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "f1": 0.8
+    },
+    "EMPLOYEE_ID": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "HOME_ADDRESS": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "NATIONAL_ID": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PARTIAL_IDENTIFIER": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PASSPORT": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 0,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "PAYMENT_CARD": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "PERSON": {
+      "tp": 3,
+      "fp": 2,
+      "fn": 1,
+      "gold_occurrences": 4,
+      "predicted_occurrences": 5,
+      "precision": 0.6,
+      "recall": 0.75,
+      "f1": 0.6666666666666666
+    },
+    "PHONE": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "TAX_ID": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "VENDOR_PERSON_ID": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "gold_occurrences": 1,
+      "predicted_occurrences": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "by_format": {
+    "docx": {
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "gold_occurrences": 2,
+      "predicted_occurrences": 3,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "f1": 0.8
+    },
+    "pdf": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 1,
+      "gold_occurrences": 11,
+      "predicted_occurrences": 10,
+      "precision": 1.0,
+      "recall": 0.9090909090909091,
+      "f1": 0.9523809523809523
+    },
+    "pptx": {
+      "tp": 4,
+      "fp": 2,
+      "fn": 1,
+      "gold_occurrences": 5,
+      "predicted_occurrences": 6,
+      "precision": 0.6666666666666666,
+      "recall": 0.8,
+      "f1": 0.7272727272727273
+    }
+  },
+  "by_document": {
+    "syn_docx": {
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "gold_occurrences": 2,
+      "predicted_occurrences": 3,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "f1": 0.8
+    },
+    "syn_pdf": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 1,
+      "gold_occurrences": 11,
+      "predicted_occurrences": 10,
+      "precision": 1.0,
+      "recall": 0.9090909090909091,
+      "f1": 0.9523809523809523
+    },
+    "syn_pptx": {
+      "tp": 4,
+      "fp": 2,
+      "fn": 1,
+      "gold_occurrences": 5,
+      "predicted_occurrences": 6,
+      "precision": 0.6666666666666666,
+      "recall": 0.8,
+      "f1": 0.7272727272727273
+    }
+  },
+  "by_source_kind": {
+    "body": {
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "gold_occurrences": 0,
+      "predicted_occurrences": 1,
+      "precision": 0.0,
+      "recall": null,
+      "f1": 0.0
+    },
+    "narrative": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 1,
+      "gold_occurrences": 11,
+      "predicted_occurrences": 10,
+      "precision": 1.0,
+      "recall": 0.9090909090909091,
+      "f1": 0.9523809523809523
+    },
+    "table": {
+      "tp": 6,
+      "fp": 2,
+      "fn": 1,
+      "gold_occurrences": 7,
+      "predicted_occurrences": 8,
+      "precision": 0.75,
+      "recall": 0.8571428571428571,
+      "f1": 0.8
+    }
+  },
+  "by_text_origin": {
+    "image_only": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 1,
+      "gold_occurrences": 11,
+      "predicted_occurrences": 10,
+      "precision": 1.0,
+      "recall": 0.9090909090909091,
+      "f1": 0.9523809523809523
+    },
+    "native_text": {
+      "tp": 6,
+      "fp": 3,
+      "fn": 1,
+      "gold_occurrences": 7,
+      "predicted_occurrences": 9,
+      "precision": 0.6666666666666666,
+      "recall": 0.8571428571428571,
+      "f1": 0.75
+    }
+  },
+  "structure": {
+    "syn_docx": {
+      "status": "reviewed",
+      "score": 0.9,
+      "meets_80_percent": true,
+      "dimensions": {
+        "headings": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "reading_order": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "block_boundaries": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "table_relationships": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "neighboring_context": {
+          "applicable": true,
+          "passed": 1,
+          "total": 2,
+          "score": 0.5
+        }
+      },
+      "text_accuracy": {
+        "correct_characters": 90,
+        "reference_characters": 100,
+        "score": 0.9
+      }
+    },
+    "syn_pdf": {
+      "status": "reviewed",
+      "score": 0.9,
+      "meets_80_percent": true,
+      "dimensions": {
+        "headings": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "reading_order": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "block_boundaries": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "table_relationships": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "neighboring_context": {
+          "applicable": true,
+          "passed": 1,
+          "total": 2,
+          "score": 0.5
+        }
+      },
+      "text_accuracy": {
+        "correct_characters": 90,
+        "reference_characters": 100,
+        "score": 0.9
+      }
+    },
+    "syn_pptx": {
+      "status": "reviewed",
+      "score": 0.9,
+      "meets_80_percent": true,
+      "dimensions": {
+        "headings": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "reading_order": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "block_boundaries": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "table_relationships": {
+          "applicable": true,
+          "passed": 2,
+          "total": 2,
+          "score": 1.0
+        },
+        "neighboring_context": {
+          "applicable": true,
+          "passed": 1,
+          "total": 2,
+          "score": 0.5
+        }
+      },
+      "text_accuracy": {
+        "correct_characters": 90,
+        "reference_characters": 100,
+        "score": 0.9
+      }
+    }
+  },
+  "release_audit": {
+    "syn_docx": {
+      "status": "approved",
+      "known_residual_occurrences": 0,
+      "checked_distinct_gold_values": 2,
+      "checked_gold_occurrences": 2,
+      "residuals": [],
+      "missing_block_ids": [],
+      "empty_block_ids": [],
+      "release_blockers": [],
+      "unsafe_approval": false,
+      "scope": "Known labeled text values only. Does not certify sanitized original files or unseen PII."
+    },
+    "syn_pdf": {
+      "status": "approved",
+      "known_residual_occurrences": 1,
+      "checked_distinct_gold_values": 11,
+      "checked_gold_occurrences": 11,
+      "residuals": [
+        {
+          "entity_types": [
+            "PASSPORT"
+          ],
+          "source_block_ids": [
+            "narrative"
+          ],
+          "gold_occurrences": 1,
+          "residual_occurrences": 1
+        }
+      ],
+      "missing_block_ids": [],
+      "empty_block_ids": [],
+      "release_blockers": [
+        "known_gold_values_survive"
+      ],
+      "unsafe_approval": true,
+      "scope": "Known labeled text values only. Does not certify sanitized original files or unseen PII."
+    },
+    "syn_pptx": {
+      "status": "approved",
+      "known_residual_occurrences": 0,
+      "checked_distinct_gold_values": 4,
+      "checked_gold_occurrences": 5,
+      "residuals": [],
+      "missing_block_ids": [],
+      "empty_block_ids": [],
+      "release_blockers": [],
+      "unsafe_approval": false,
+      "scope": "Known labeled text values only. Does not certify sanitized original files or unseen PII."
+    }
+  },
+  "extraction_coverage": {
+    "syn_docx": {
+      "expected_units": 1,
+      "complete_units": 1,
+      "coverage": 1.0,
+      "missing_or_incomplete_units": [],
+      "extraction_complete": true
+    },
+    "syn_pdf": {
+      "expected_units": 1,
+      "complete_units": 1,
+      "coverage": 1.0,
+      "missing_or_incomplete_units": [],
+      "extraction_complete": true
+    },
+    "syn_pptx": {
+      "expected_units": 1,
+      "complete_units": 1,
+      "coverage": 1.0,
+      "missing_or_incomplete_units": [],
+      "extraction_complete": true
+    }
+  },
+  "limitations": [
+    "Exact metrics cover selected labeled blocks, including reviewed negatives.",
+    "Overlap matches are diagnostic and do not raise exact recall.",
+    "Visual regions have separate bbox metrics and no text offsets.",
+    "Zero known residuals does not guarantee future documents contain no PII.",
+    "Source sample and synthetic results do not establish full-source accuracy."
+  ]
+}

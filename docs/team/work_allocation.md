@@ -1,5 +1,7 @@
 # Five-person team plan
 
+Implementation update (13 October 2026): Person 2 now has PDF/DOCX/PPTX extraction, local OCR/vector conversion, source mapping, CLI and an automated regression suite. Independent OCR/structure scoring and resolution of the source-specific confidence/image warnings remain open. See `docs/person2_extraction.md`; the allocation below remains the team ownership plan.
+
 ## Detailed five-person work allocation
 
 Each person owns an implementation component, its focused tests, documentation and a presentation contribution. Person 5 coordinates QA and assembly; everyone supplies reviewed content and annotations. Replace the placeholders with names when the team is known.

@@ -1,0 +1,300 @@
+"""
+cadence_detection.detection.pii_detector
+=========================================
+Person 3 – Baseline PII detector: increment 1.  Stdlib-only, deterministic.
+
+Entity types detected:
+    EMAIL        – Conservative local@domain.tld pattern.
+    PHONE        – Requires a context keyword (Tel, Mobile, Phone, M, …).
+                   Confidence scores are heuristic, not calibrated probabilities.
+    PERSON       – Label-gated synthetic name pattern for "Name:" and
+                   "Employee Name:" fields.
+    DATE_OF_BIRTH – Label-gated calendar date for "DOB:", "Date of Birth:",
+                   and "Birth Date:" fields.
+    EMPLOYEE_ID  – Synthetic EMP-<digits> fixture only.  NOT an official Cadence
+                   identifier; replace before production use.
+
+Finding fields follow interfaces.md line 8 verbatim.  Offsets are Python Unicode
+code-point positions, start-inclusive/end-exclusive into the unmodified block.text.
+
+source_location format "<block_id>:<start>:<end>" is PROVISIONAL – Person 1 or
+Person 4 must confirm before treating it as stable.
+
+Overlap policy (PROVISIONAL – Person 1 / Person 4 review required): greedy,
+priority = descending confidence → descending span → ascending start → ascending
+end → ascending entity_type.  Exact duplicates (same doc/block/type/start/end)
+are collapsed to the first occurrence.
+
+Known limitations:
+    PHONE: date-shaped values are excluded when they follow a phone context
+        label. Other numeric ambiguity remains context-dependent.
+    PHONE/FP-2: standalone uppercase 'M' is the mobile abbreviation; lowercase
+        'm' is excluded via (?-i:M) to avoid unit-prefix false positives.
+
+No raw matched values are logged anywhere in this module.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from datetime import date
+
+DETECTOR_ID = "cadence.detection.pii_detector.v0"
+
+
+@dataclass(frozen=True)
+class Block:
+    """Fields consumed by this detector (interfaces.md line 6). Full Block contract owned by Person 1."""
+    document_id: str
+    block_id: str
+    text: str
+
+
+@dataclass(frozen=True)
+class Finding:
+    """Detection-layer finding (interfaces.md line 8)."""
+    document_id: str
+    block_id: str
+    entity_type: str
+    start: int        # Unicode code-point, inclusive
+    end: int          # Unicode code-point, exclusive
+    confidence: float
+    detector: str
+    source_location: str  # PROVISIONAL format – see module docstring
+
+
+# Conservative local@domain.tld match; does not implement full RFC 5321.
+_EMAIL_PATTERN = re.compile(
+    r"(?<![.\w@])"
+    r"[a-zA-Z0-9._%+\-]+"
+    r"@"
+    r"[a-zA-Z0-9.\-]+"
+    r"\.[a-zA-Z]{2,}"
+    r"(?![.\w@])",
+    re.UNICODE,
+)
+
+# PHONE: keyword-gated. Long keywords are case-insensitive; standalone 'M'
+# (mobile abbreviation) uses (?-i:M) to remain case-sensitive – see PHONE/FP-2.
+_PHONE_CONTEXT = (
+    r"(?:"
+    r"(?:tel|telephone|phone|mobile|mob|cell|fax|ph|contact)"
+    r"|"
+    r"(?<!\w)(?-i:M)(?!\w)"
+    r")"
+    r"(?:\s*(?:no|num|number|#))?"
+    r"\s*[:\-]?\s*"
+)
+# Digit body: optional leading + or (, with separators, ending on a digit.
+# Short numbers are accepted only after the context keyword and are filtered
+# to at least three digits in detect().
+_PHONE_DIGITS = (
+    r"(?:\+?\(?\d[\d\s\-./\(\)]*\d)"
+)
+_PHONE_PATTERN = re.compile(
+    _PHONE_CONTEXT + r"(" + _PHONE_DIGITS + r")",
+    re.IGNORECASE | re.UNICODE,
+)
+_DATE_LIKE_PHONE = re.compile(r"\d{4}[-/.]\d{1,2}[-/.]\d{1,2}")
+
+# PERSON: contextual only. The value is validated after matching so ordinary
+# capitalized prose and unlabeled organization names are not treated as names.
+_NAME_PATTERN = re.compile(
+    r"(?i)(?<![\w])(?:employee\s+name|name)\s*:\s*"
+    r"([^\W\d_']+(?:-[^\W\d_']+)*(?:\s+[^\W\d_']+(?:-[^\W\d_']+)*){1,3})"
+    r"(?![\w])",
+    re.UNICODE,
+)
+
+# DATE_OF_BIRTH: context-gated; slash-separated dates are detected without
+# assigning a day-first or month-first interpretation.
+_DOB_PATTERN = re.compile(
+    r"(?i)(?<![\w])(?:dob|date\s+of\s+birth|birth\s+date)\s*:\s*"
+    r"(\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4})"
+    r"(?![\d/-])",
+    re.UNICODE,
+)
+
+# EMPLOYEE_ID: synthetic EMP-<digits> test fixture only – NOT an official identifier.
+_EMP_ID_PATTERN = re.compile(
+    r"(?<![\w.-])"
+    r"EMP-\d{3,8}"
+    r"(?![\w.-])",
+    re.UNICODE,
+)
+
+
+def _make_source_location(block_id: str, start: int, end: int) -> str:
+    """Provisional format "<block_id>:<start>:<end>" – see module docstring."""
+    return f"{block_id}:{start}:{end}"
+
+
+def _match_to_finding(
+    m: re.Match,
+    *,
+    document_id: str,
+    block_id: str,
+    entity_type: str,
+    confidence: float,
+    span_group: int | None = None,
+) -> Finding:
+    """Build a Finding from a Match; span_group selects a capture group (used for PHONE)."""
+    if span_group is not None:
+        start, end = m.span(span_group)
+    else:
+        start, end = m.span()
+
+    return Finding(
+        document_id=document_id,
+        block_id=block_id,
+        entity_type=entity_type,
+        start=start,
+        end=end,
+        confidence=confidence,
+        detector=DETECTOR_ID,
+        source_location=_make_source_location(block_id, start, end),
+    )
+
+
+def _is_valid_dob(value: str) -> bool:
+    """Validate calendar dates without interpreting ambiguous slash dates."""
+    if "-" in value:
+        year, month, day = (int(part) for part in value.split("-"))
+        candidates = [(year, month, day)]
+    else:
+        first, second, year = (int(part) for part in value.split("/"))
+        candidates = [(year, first, second), (year, second, first)]
+
+    for year, month, day in candidates:
+        try:
+            date(year, month, day)
+        except ValueError:
+            continue
+        return True
+    return False
+
+
+def _deduplicate(findings: list[Finding]) -> list[Finding]:
+    """Remove exact duplicates (same doc/block/type/start/end), keeping first occurrence."""
+    seen: set[tuple] = set()
+    result: list[Finding] = []
+    for f in findings:
+        key = (f.document_id, f.block_id, f.entity_type, f.start, f.end)
+        if key not in seen:
+            seen.add(key)
+            result.append(f)
+    return result
+
+
+def _resolve_overlaps(findings: list[Finding]) -> list[Finding]:
+    """Greedy overlap resolution using the PROVISIONAL policy in the module docstring.
+    Two findings overlap when their [start, end) ranges intersect, regardless of type.
+    """
+
+    def priority_key(f: Finding):
+        return (-f.confidence, -(f.end - f.start), f.start, f.end, f.entity_type)
+
+    sorted_findings = sorted(findings, key=priority_key)
+    accepted: list[Finding] = []
+
+    for candidate in sorted_findings:
+        overlaps = any(
+            candidate.start < kept.end and candidate.end > kept.start
+            for kept in accepted
+        )
+        if not overlaps:
+            accepted.append(candidate)
+
+    # Final sort into document order; the greedy pass does not preserve it.
+    accepted.sort(key=lambda f: (f.start, f.end, f.entity_type))
+    return accepted
+
+
+def detect(block: Block) -> list[Finding]:
+    """Run all detectors against a Block; return deduplicated, overlap-resolved Findings.
+
+    block.text must be the exact normalized text used for all downstream offset work.
+    No raw matched text is logged or retained beyond this function's local scope.
+    """
+    raw: list[Finding] = []
+
+    # EMAIL
+    for m in _EMAIL_PATTERN.finditer(block.text):
+        raw.append(
+            _match_to_finding(
+                m,
+                document_id=block.document_id,
+                block_id=block.block_id,
+                entity_type="EMAIL",
+                confidence=0.95,
+            )
+        )
+
+    # PHONE – span_group=1 captures the digit body, excluding the context keyword.
+    for m in _PHONE_PATTERN.finditer(block.text):
+        start, end = m.span(1)
+        phone_text = block.text[start:end]
+        digit_count = sum(character.isdigit() for character in phone_text)
+        if digit_count < 3 or _DATE_LIKE_PHONE.fullmatch(phone_text):
+            continue
+        raw.append(
+            _match_to_finding(
+                m,
+                document_id=block.document_id,
+                block_id=block.block_id,
+                entity_type="PHONE",
+                confidence=0.85,
+                span_group=1,
+            )
+        )
+
+    # PERSON – span_group=1 captures the labeled name, excluding the label.
+    for m in _NAME_PATTERN.finditer(block.text):
+        start, end = m.span(1)
+        name_text = block.text[start:end]
+        name_tokens = name_text.split()
+        name_parts = [part for token in name_tokens for part in token.split("-")]
+        if not all(part[0].isupper() and len(part) > 1 for part in name_parts):
+            continue
+        raw.append(
+            _match_to_finding(
+                m,
+                document_id=block.document_id,
+                block_id=block.block_id,
+                entity_type="PERSON",
+                confidence=0.90,
+                span_group=1,
+            )
+        )
+
+    # DATE_OF_BIRTH – span_group=1 captures the date, excluding the label.
+    for m in _DOB_PATTERN.finditer(block.text):
+        if not _is_valid_dob(m.group(1)):
+            continue
+        raw.append(
+            _match_to_finding(
+                m,
+                document_id=block.document_id,
+                block_id=block.block_id,
+                entity_type="DATE_OF_BIRTH",
+                confidence=0.90,
+                span_group=1,
+            )
+        )
+
+    # EMPLOYEE_ID (synthetic test fixture only)
+    for m in _EMP_ID_PATTERN.finditer(block.text):
+        raw.append(
+            _match_to_finding(
+                m,
+                document_id=block.document_id,
+                block_id=block.block_id,
+                entity_type="EMPLOYEE_ID",
+                confidence=0.80,
+            )
+        )
+
+    deduped = _deduplicate(raw)
+    resolved = _resolve_overlaps(deduped)
+    return resolved

@@ -1,12 +1,88 @@
 {
-  "status": "draft_not_implemented",
-  "formats": [
+  "version": "1.0.0",
+  "pipeline_name": "cadence_document_privacy_pipeline",
+  "processing": {
+    "execution_mode": "local",
+    "enforce_trust_boundary": true,
+    "allow_external_egress": false,
+    "downstream_input": "verified_sanitized_text_only"
+  },
+  "supported_formats": [
     "pdf",
     "pptx",
     "docx"
   ],
-  "processing": "local",
-  "ocr": "required_for_scans_and_embedded_images",
-  "failure_policy": "quarantine",
-  "downstream_input": "verified_sanitized_text_only"
+  "format_mime_types": {
+    "pdf": ["application/pdf"],
+    "pptx": [
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/zip"
+    ],
+    "docx": [
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/zip"
+    ]
+  },
+  "limits": {
+    "max_file_size_bytes": 52428800,
+    "max_file_size_by_format": {
+      "pdf": 52428800,
+      "pptx": 31457280,
+      "docx": 31457280
+    },
+    "max_pages_pdf": 100,
+    "max_slides_pptx": 50,
+    "processing_timeout_seconds": 300
+  },
+  "ocr": {
+    "required_for_scans_and_embedded_images": true,
+    "min_ocr_confidence_threshold": 0.70,
+    "warning_ocr_confidence_threshold": 0.80,
+    "auto_ocr_empty_text_density_threshold": 20,
+    "tesseract_language": "eng"
+  },
+  "quarantine_rules": {
+    "quarantine_on_corrupt_file": true,
+    "quarantine_on_password_protected": true,
+    "quarantine_on_oversized": true,
+    "quarantine_on_mime_mismatch": true,
+    "quarantine_on_unsupported_format": true,
+    "quarantine_on_low_ocr_confidence": true,
+    "quarantine_on_unsupported_embedded_media": true,
+    "quarantine_on_incomplete_extraction": true,
+    "quarantine_on_rescan_failure": true,
+    "quarantine_on_processing_error": true
+  },
+  "redaction": {
+    "token_style": "stable_typed_token",
+    "token_format": "<{entity_type}_{index}>",
+    "fallback_token_format": "<REDACTED:{entity_type}>",
+    "require_post_redaction_rescan": true,
+    "rescan_allowed_residual_pii_count": 0
+  },
+  "storage": {
+    "temp_dir": "/tmp/cadence_privacy_pipeline",
+    "output_dir": "output/redacted",
+    "report_dir": "output/reports",
+    "quarantine_dir": "output/quarantined",
+    "cleanup_temp_files_on_exit": true
+  },
+  "logging": {
+    "level": "INFO",
+    "log_raw_pii": false,
+    "log_document_id": true,
+    "log_entity_offsets_only": true
+  },
+  "retry_policy": {
+    "max_retries": 1,
+    "retry_on_transient_io_errors": true,
+    "no_retry_on_validation_errors": true
+  },
+  "feature_flags": {
+    "enable_native_pdf_extraction": true,
+    "enable_ocr_fallback": true,
+    "enable_embedded_image_extraction": true,
+    "enable_rescan_gate": true,
+    "enable_strict_mime_check": true
+  }
 }

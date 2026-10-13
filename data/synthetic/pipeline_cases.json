@@ -1,0 +1,14 @@
+[
+  {"case_id":"VALID-PDF","filename":"valid.pdf","allowed_statuses":["approved"],"must_block_downstream":false,"forbidden_literals":["Noor Example","noor@example.invalid"]},
+  {"case_id":"VALID-PPTX","filename":"valid.pptx","allowed_statuses":["approved"],"must_block_downstream":false,"forbidden_literals":["Noor Example","noor@example.invalid"]},
+  {"case_id":"VALID-DOCX","filename":"valid.docx","allowed_statuses":["approved"],"must_block_downstream":false,"forbidden_literals":["Noor Example","noor@example.invalid"]},
+  {"case_id":"EMPTY-PDF","filename":"empty.pdf","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"EMPTY-PPTX","filename":"empty.pptx","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"EMPTY-DOCX","filename":"empty.docx","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"CORRUPT-PDF","filename":"corrupt.pdf","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"CORRUPT-PPTX","filename":"corrupt.pptx","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"CORRUPT-DOCX","filename":"corrupt.docx","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"UNSUPPORTED","filename":"unsupported.txt","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"SPOOFED-PDF","filename":"spoofed.pdf","allowed_statuses":["quarantined","failed"],"must_block_downstream":true},
+  {"case_id":"ENCRYPTED-PDF","filename":"encrypted.pdf","allowed_statuses":["quarantined","failed"],"must_block_downstream":true}
+]

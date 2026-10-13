@@ -1,0 +1,10 @@
+id,severity,kind,status,owner,source_or_case,observed_or_dependency,expected,evidence
+QA-001,blocker,dependency,open,Person 1,all formats,Integrated pipeline and local QA runner absent,Provide adapter exercising real stages,src ingestion contains scaffold only
+QA-002,blocker,dependency,open,Person 2,policy all pages,OCR and extraction coverage absent,35 pages and screenshot regions accounted for,35 scanned pages verified in original
+QA-003,blocker,dependency,open,Person 3,all types,Detection/classification implementation absent,Findings on frozen blocks with exact offsets,src detection contains scaffold only
+QA-004,blocker,dependency,open,Person 4,release gate,Redactor and gate implementation absent,Sanitized blocks and local downstream spy evidence,src redaction and app contain scaffold only
+QA-005,high,annotation,pending_review,Person 5 and team,source annotations,Starter labels provisional and partial,Second review plus complete gold scope,Local starter and review queue
+QA-006,high,coverage,open,Person 2,DOCX media,SVG/EMF content requires conversion or explicit quarantine,Account for all 41 entries with no silent omission,Source ZIP media inventory
+QA-007,medium,source_discrepancy,recorded,Person 1,policy vs training,Tier 2 review frequencies differ,Preserve discrepancy without merging requirements,Existing source review
+QA-008,medium,source_discrepancy,recorded,Person 1,PPTX slide 2,Five divisions stated but six areas listed,Preserve source in extraction,Original slide 2
+QA-009,high,synthetic_expected_failure,expected,Person 5,Synthetic fixture,Known passport leak under claimed approval,Evaluator flags unsafe approval,Synthetic evaluator report only

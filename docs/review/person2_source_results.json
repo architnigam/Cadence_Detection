@@ -1,0 +1,48 @@
+[
+  {
+    "filename": "Cadence_Financial_Group_Organizational_Pack.pptx",
+    "sha256": "3803c99e0109cf376fe7ee52b0c1354d81b68e7aa46a0fdcc3adcfb1653ea9c2",
+    "status": "extracted",
+    "coverage": {
+      "total_units": 9,
+      "processed_units": 9,
+      "block_count": 474,
+      "ocr_block_count": 9,
+      "note": "Processing coverage is not OCR accuracy, PII recall, or structure score."
+    },
+    "issue_counts": {}
+  },
+  {
+    "filename": "Cadence_Group_Risk_Management_Policy__v6.0.pdf",
+    "sha256": "3f4b5db17d2e2694630fe4244754a270d4c0dde68ef009ee0495e43a2bf606f3",
+    "status": "quarantined",
+    "coverage": {
+      "total_units": 35,
+      "processed_units": 35,
+      "block_count": 2123,
+      "ocr_block_count": 2118,
+      "note": "Processing coverage is not OCR accuracy, PII recall, or structure score."
+    },
+    "issue_counts": {
+      "LOW_OCR_CONFIDENCE": 116
+    }
+  },
+  {
+    "filename": "Cadence_TPRM_Training.docx",
+    "sha256": "b154a86d70928b70792a04e53753ee2390d954395b74a743704da82b822e3813",
+    "status": "quarantined",
+    "coverage": {
+      "total_units": 1,
+      "processed_units": 1,
+      "block_count": 4258,
+      "ocr_block_count": 1558,
+      "note": "Processing coverage is not OCR accuracy, PII recall, or structure score."
+    },
+    "issue_counts": {
+      "WORD_MERGED_CELL": 22,
+      "IMAGE_NO_TEXT": 3,
+      "LOW_OCR_CONFIDENCE": 264,
+      "WORD_PAGINATION": 1
+    }
+  }
+]

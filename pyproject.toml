@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cadence-detection"
+version = "0.2.0"
+description = "Local document extraction, privacy pipeline components and independent evaluation"
+requires-python = ">=3.10"
+dependencies = ["pypdf>=5,<7", "pypdfium2>=4,<6", "Pillow>=10,<13", "lxml>=5,<7"]
+
+[project.optional-dependencies]
+nlp = ["spacy>=3.8,<3.9"]
+svg = ["CairoSVG>=2.7,<3"]
+test = ["python-docx>=1,<2", "python-pptx>=1,<2", "reportlab>=4,<5"]
+
+[project.scripts]
+cadence-extract = "cadence_detection.extraction.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"cadence_detection.extraction" = ["*.cjs"]
