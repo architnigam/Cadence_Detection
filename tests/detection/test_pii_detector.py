@@ -482,7 +482,93 @@ class TestSourceMetadata(unittest.TestCase):
         self.assertEqual(f.source_location, expected)
 
 
-# 11. Edge cases: empty / whitespace input
+# 11. Finding contract and deterministic result behavior
+
+class TestFindingContract(unittest.TestCase):
+
+    def test_every_finding_has_required_fields_and_valid_entity_type(self):
+        text = "synth@example.com Tel: +1 (555) 0114 EMP-12345"
+        findings = detect(_make_block(text, doc_id="doc-contract", blk_id="blk-contract"))
+        valid_types = {"EMAIL", "PHONE", "EMPLOYEE_ID"}
+
+        self.assertEqual({f.entity_type for f in findings}, valid_types)
+        for finding in findings:
+            self.assertIsInstance(finding.document_id, str)
+            self.assertIsInstance(finding.block_id, str)
+            self.assertIn(finding.entity_type, valid_types)
+            self.assertIsInstance(finding.start, int)
+            self.assertIsInstance(finding.end, int)
+            self.assertIsInstance(finding.confidence, float)
+            self.assertIsInstance(finding.detector, str)
+            self.assertIsInstance(finding.source_location, str)
+
+    def test_findings_use_exact_start_inclusive_end_exclusive_spans(self):
+        text = "synth@example.com; Tel: +1 (555) 0114; EMP-12345"
+        findings = detect(_make_block(text))
+        expected_spans = {
+            "EMAIL": "synth@example.com",
+            "PHONE": "+1 (555) 0114",
+            "EMPLOYEE_ID": "EMP-12345",
+        }
+
+        for finding in findings:
+            self.assertEqual(text[finding.start:finding.end], expected_spans[finding.entity_type])
+            self.assertGreaterEqual(finding.start, 0)
+            self.assertLessEqual(finding.end, len(text))
+            self.assertLess(finding.start, finding.end)
+
+    def test_unicode_prefix_preserves_exact_offsets_for_all_entity_types(self):
+        prefix = "café — 中文 📄 "
+        text = prefix + "synth@example.com Tel: 01234567890; EMP-54321"
+        findings = detect(_make_block(text))
+
+        self.assertEqual(
+            [(f.entity_type, text[f.start:f.end]) for f in findings],
+            [
+                ("EMAIL", "synth@example.com"),
+                ("PHONE", "01234567890"),
+                ("EMPLOYEE_ID", "EMP-54321"),
+            ],
+        )
+        for finding in findings:
+            self.assertEqual(
+                text[finding.start:finding.end],
+                {
+                    "EMAIL": "synth@example.com",
+                    "PHONE": "01234567890",
+                    "EMPLOYEE_ID": "EMP-54321",
+                }[finding.entity_type],
+            )
+
+    def test_mixed_results_are_stable_and_sorted_by_document_position(self):
+        text = "EMP-12345; synth@example.com; Tel: 01234567890"
+        block = _make_block(text)
+
+        first = detect(block)
+        second = detect(block)
+
+        self.assertEqual(first, second)
+        self.assertEqual(
+            [(f.entity_type, f.start, f.end) for f in first],
+            [
+                ("EMPLOYEE_ID", 0, 9),
+                ("EMAIL", 11, 28),
+                ("PHONE", 35, 46),
+            ],
+        )
+
+    def test_detected_results_have_no_duplicate_finding_keys(self):
+        text = "synth@example.com and synth@example.com"
+        findings = detect(_make_block(text))
+        keys = [
+            (f.document_id, f.block_id, f.entity_type, f.start, f.end)
+            for f in findings
+        ]
+
+        self.assertEqual(len(keys), len(set(keys)))
+
+
+# 12. Edge cases: empty / whitespace input
 
 class TestEdgeCases(unittest.TestCase):
 
@@ -520,7 +606,7 @@ class TestEdgeCases(unittest.TestCase):
 
 
 
-# 12. Phone – M-label (abbreviated mobile keyword) — G1
+# 13. Phone – M-label (abbreviated mobile keyword) — G1
 
 class TestPhoneMAbbreviation(unittest.TestCase):
     """Single-letter 'M' mobile label; uppercase only (see PHONE/FP-2)."""
@@ -576,7 +662,7 @@ class TestPhoneMAbbreviation(unittest.TestCase):
         self.assertEqual(len(phones), 0)
 
 
-# 13. Phone – complete span with parentheses and plus-sign — G2, G3
+# 14. Phone – complete span with parentheses and plus-sign — G2, G3
 
 class TestPhoneCompleteSpan(unittest.TestCase):
     """Verify phone span includes +, parens, and spaces, and excludes the keyword."""
@@ -648,7 +734,7 @@ class TestPhoneCompleteSpan(unittest.TestCase):
         self.assertNotIn("Phone", sliced)
 
 
-# 14. Phone – false-positive regressions — G4, G5
+# 15. Phone – false-positive regressions — G4, G5
 
 class TestPhoneFalsePositiveRegressions(unittest.TestCase):
     """Verify numeric strings without phone keywords do not produce PHONE findings."""
@@ -692,7 +778,7 @@ class TestPhoneFalsePositiveRegressions(unittest.TestCase):
         )
 
 
-# 15. Employee-ID – end-of-string and boundary — G6
+# 16. Employee-ID – end-of-string and boundary — G6
 
 class TestEmployeeIdBoundary(unittest.TestCase):
 
@@ -725,7 +811,7 @@ class TestEmployeeIdBoundary(unittest.TestCase):
         self.assertEqual(text[f.start:f.end], "EMP-12345")
 
 
-# 16. Unicode offsets – extended coverage for new phone formats
+# 17. Unicode offsets – extended coverage for new phone formats
 
 class TestUnicodeOffsetsExtended(unittest.TestCase):
 
