@@ -201,7 +201,7 @@ class PipelineOrchestrator:
         # directory traversal components in a manifest or log record.
         actual_filename = Path(raw_filename).name or "unnamed_document"
 
-        logger.info("Initiating ingestion: filename='%s'", actual_filename)
+        logger.info("Initiating local document validation")
 
         # 1. Ingestion Validation
         val_res: ValidationResult = self.validator.validate(file_path_or_bytes, filename=actual_filename)
@@ -276,7 +276,7 @@ class PipelineOrchestrator:
             quarantine_reasons.append(QuarantineReason.LOW_OCR_CONFIDENCE)
             errors.append(f"Mean OCR confidence {extract_res.mean_ocr_confidence:.3f} below threshold {min_ocr_conf}")
 
-        if quarantine_reasons:
+        if quarantine_reasons and not self.config.get('analyze_quarantined',False):
             return self._build_quarantine_response(manifest, quarantine_reasons, errors, start_time)
 
         # 4. PII Detection (Person 3)
@@ -292,6 +292,9 @@ class PipelineOrchestrator:
             quarantine_reasons.append(QuarantineReason.DETECTION_FAILED)
             errors.append("PII detector returned null response.")
             return self._build_quarantine_response(manifest, quarantine_reasons, errors, start_time)
+        if detect_res.metadata.get('complete') is False:
+            quarantine_reasons.append(QuarantineReason.DETECTION_FAILED)
+            errors.append('Detection dependencies or coverage require review.')
 
         logger.info(
             "Detection complete: doc_id=%s, total_findings=%d",
@@ -350,6 +353,8 @@ class PipelineOrchestrator:
             return self._build_quarantine_response(manifest, quarantine_reasons, errors, start_time)
 
         # 7. Privacy Gate Release Approval
+        if quarantine_reasons:
+            return self._build_quarantine_response(manifest,quarantine_reasons,errors,start_time)
         manifest.processing_status = ProcessingStatus.COMPLETED
         sanitized_full_text = "\n\n".join(b.text for b in redact_res.sanitized_blocks)
         sanitized_blocks_dict = [asdict(b) for b in redact_res.sanitized_blocks]

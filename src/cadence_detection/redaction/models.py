@@ -29,7 +29,7 @@ class Block:
     """Represents an extracted unit of text (paragraph, cell, slide shape)."""
     document_id: str
     block_id: str
-    page_or_slide: int  # 1-based index
+    page_or_slide: Optional[int]  # DOCX/XML and metadata may not have a page index
     source_kind: str    # e.g., 'pptx_shape', 'docx_paragraph', 'pdf_ocr_block'
     reading_order: int
     text: str

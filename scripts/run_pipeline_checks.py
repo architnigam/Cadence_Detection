@@ -1,6 +1,7 @@
 """Run Person 5 black-box failure/success checks via a local integration adapter."""
 
 import argparse
+import bootstrap
 import importlib
 import json
 from pathlib import Path
