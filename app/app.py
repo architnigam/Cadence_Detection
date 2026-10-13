@@ -53,6 +53,79 @@ def apply_custom_css(theme_mode="Dark"):
             overflow-x: hidden !important;
         }}
 
+        /* Breadcrumb (Base-UI style) */
+        .breadcrumb-box {{
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: {sub_color};
+            margin-bottom: 12px;
+        }}
+
+        .breadcrumb-box a {{
+            color: {sub_color};
+            text-decoration: none;
+        }}
+
+        .breadcrumb-box a:hover {{
+            color: {text_color};
+        }}
+
+        .breadcrumb-active {{
+            background: {card_bg};
+            border: 1px solid {border_color};
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: {text_color};
+        }}
+
+        /* Base-UI Badge7 Dot Badges */
+        .badge-ghost {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.785rem;
+            font-weight: 600;
+            background-color: {card_bg};
+            border: 1px solid {border_color};
+            color: {text_color};
+        }}
+
+        .badge-dot {{
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }}
+
+        .dot-primary {{ background-color: #3b82f6; }}
+        .dot-success {{ background-color: #10b981; }}
+        .dot-danger {{ background-color: #ef4444; }}
+        .dot-warning {{ background-color: #f59e0b; }}
+
+        /* Avatar2 Component */
+        .avatar-box {{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            overflow: hidden;
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }}
+
+        .avatar-box img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }}
+
         /* Header Contact Ribbon */
         .incident-header {{
             background-color: {card_bg};
@@ -177,12 +250,51 @@ def main():
         ["[{entity_type}_{index}]", "<{entity_type}_{index}>", "REDACTED_{entity_type}"]
     )
 
-    # Clickable Logo Header
+    # Breadcrumb4 Component with Dot Separators
     st.markdown("""
-    <a href="#home" class="brand-logo-container" id="brandLogo">
-        <span>🛡️ Cadence Financial Group</span>
-        <span class="brand-badge">TRUST BOUNDARY</span>
-    </a>
+    <div class="breadcrumb-box">
+        <a href="#">Library</a>
+        <span style="opacity: 0.5;">•</span>
+        <a href="#">Resources</a>
+        <span style="opacity: 0.5;">•</span>
+        <span class="breadcrumb-active">Design Notes</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Clickable Logo Header with Avatar2 Profile
+    st.markdown("""
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 8px;">
+        <a href="#home" class="brand-logo-container" id="brandLogo">
+            <span>🛡️ Cadence Financial Group</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="avatar-box" title="Alex Rivera · Data Protection Officer">
+                <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera">
+            </div>
+            <div style="line-height: 1.2;">
+                <div style="font-size: 0.85rem; font-weight: 700;">Alex Rivera</div>
+                <div style="font-size: 0.7rem; color: #94a3b8;">DPO Officer</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Badge7 Ghost Dot Badges (color-coded by use case)
+    st.markdown("""
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+        <span class="badge-ghost">
+            <span class="badge-dot dot-primary"></span>
+            Enterprise Trust Boundary
+        </span>
+        <span class="badge-ghost">
+            <span class="badge-dot dot-success"></span>
+            Air-Gapped Local Storage
+        </span>
+        <span class="badge-ghost">
+            <span class="badge-dot dot-warning"></span>
+            Case Study 2
+        </span>
+    </div>
     """, unsafe_allow_html=True)
 
     st.title("PII Redaction & Safe-Release Privacy Gate")
@@ -191,7 +303,7 @@ def main():
     # Clickable Incident Contact Bar
     st.markdown("""
     <div class="incident-header">
-        <span><strong>Accountable Officer:</strong> Elena Rostova (DPO)</span>
+        <span><strong>Accountable Officer:</strong> Alex Rivera (DPO)</span>
         <span>·</span>
         <span><strong>Direct Email:</strong> <a href="mailto:dpo@cadence.com">✉️ dpo@cadence.com</a></span>
         <span>·</span>

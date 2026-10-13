@@ -179,6 +179,158 @@
       gap: 0.75rem;
     }
 
+    /* Breadcrumb Component (Base-UI style) */
+    .breadcrumb-nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .breadcrumb-list {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .breadcrumb-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .breadcrumb-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .breadcrumb-link:hover {
+      color: var(--text-primary);
+      background-color: var(--bg-surface-alt);
+    }
+
+    .breadcrumb-page {
+      background-color: var(--bg-surface-alt);
+      color: var(--text-primary);
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .breadcrumb-separator {
+      color: var(--text-muted);
+      opacity: 0.6;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Dot Badge Component (Base-UI Badge7 style) */
+    .badge-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.785rem;
+      font-weight: 600;
+      background-color: var(--bg-surface-alt);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+      transition: all 0.2s ease;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-primary { background-color: var(--accent); box-shadow: 0 0 6px rgba(37, 99, 235, 0.6); }
+    .dot-success { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); }
+    .dot-danger { background-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.6); animation: pulse 1.8s infinite; }
+    .dot-warning { background-color: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.6); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* Avatar Component (Base-UI Avatar2 style) */
+    .avatar-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      overflow: hidden;
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      background-color: var(--bg-surface-alt);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .avatar-wrapper:hover {
+      transform: scale(1.05);
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-fallback {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+    }
+
+    .user-profile-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      padding-right: 0.4rem;
+    }
+
+    .user-profile-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .user-profile-role {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
     .theme-toggle-btn {
       background: var(--bg-surface-alt);
       border: 1px solid var(--border-strong);
@@ -738,8 +890,20 @@
         </ul>
       </nav>
 
-      <!-- Actions -->
+      <!-- Actions with Avatar2 and Theme Toggle -->
       <div class="nav-actions">
+        <!-- Avatar2 Profile Component -->
+        <div class="user-profile-badge" title="Alex Rivera · Data Protection Officer">
+          <div class="avatar-wrapper">
+            <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera" class="avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="avatar-fallback" style="display: none;">AR</span>
+          </div>
+          <div class="user-profile-info">
+            <span class="user-profile-name">Alex Rivera</span>
+            <span class="user-profile-role">DPO Officer</span>
+          </div>
+        </div>
+
         <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
           <span id="themeIcon">☀️</span>
         </button>
@@ -755,6 +919,15 @@
 
     <!-- Responsive Mobile Menu Drawer -->
     <div class="mobile-menu" id="mobileMenuDrawer">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 0.5rem 0; border-bottom: 1px solid var(--border-subtle);">
+        <div class="avatar-wrapper" style="width: 32px; height: 32px;">
+          <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera" class="avatar-img">
+        </div>
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700;">Alex Rivera</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">Data Protection Officer</div>
+        </div>
+      </div>
       <a href="#demo" class="mobile-link" onclick="closeMobileMenu()">Live Redaction Demo</a>
       <a href="#policy" class="mobile-link" onclick="closeMobileMenu()">Risk Policy v6.0</a>
       <a href="#raci" class="mobile-link" onclick="closeMobileMenu()">Org Directory & RACI</a>
@@ -769,7 +942,40 @@
 
     <!-- Hero Header -->
     <section class="hero-section" id="home">
-      <div class="hero-badge">ENTERPRISE TRUST BOUNDARY · CASE STUDY 2</div>
+
+      <!-- Breadcrumb4 Component with Dot Separators -->
+      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <ol class="breadcrumb-list">
+          <li class="breadcrumb-item">
+            <a href="#home" class="breadcrumb-link" onclick="returnToDashboard()">Library</a>
+            <span class="breadcrumb-separator" aria-hidden="true">•</span>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="#demo" class="breadcrumb-link" onclick="returnToDashboard()">Resources</a>
+            <span class="breadcrumb-separator" aria-hidden="true">•</span>
+          </li>
+          <li class="breadcrumb-item">
+            <span class="breadcrumb-page" aria-current="page">Design Notes</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Badge7 Ghost Dot Badges (dynamic color by use case) -->
+      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+        <span class="badge-ghost" title="Trust boundary enforced">
+          <span class="badge-dot dot-primary" aria-hidden="true"></span>
+          Enterprise Trust Boundary
+        </span>
+        <span class="badge-ghost" title="Local air gap active">
+          <span class="badge-dot dot-success" aria-hidden="true"></span>
+          Air-Gapped Local Storage
+        </span>
+        <span class="badge-ghost" title="Case study 2">
+          <span class="badge-dot dot-warning" aria-hidden="true"></span>
+          Case Study 2
+        </span>
+      </div>
+
       <h1 class="hero-title">Cadence PII Redaction & Safe-Release Privacy Gate</h1>
       <p class="hero-subtitle">
         Automated text extraction, local PII classification, and overlap-safe redaction. Enforces an impenetrable verification gate before unredacted text can reach any downstream Large Language Model.
@@ -777,7 +983,7 @@
 
       <!-- Incident & Contact Bar (Clickable Phone & Email) -->
       <div class="incident-bar">
-        <span><strong>Accountable Officer:</strong> Elena Rostova (DPO)</span>
+        <span><strong>Accountable Officer:</strong> Alex Rivera (DPO)</span>
         <span>·</span>
         <span><strong>Security Contact:</strong> <a href="mailto:dpo@cadence.com" id="clickableEmailLink">✉️ dpo@cadence.com</a></span>
         <span>·</span>
@@ -852,9 +1058,12 @@
       <!-- Right Main: Results & Comparison -->
       <section class="results-area">
 
-        <!-- Gate Status Alert Banner -->
+        <!-- Gate Status Alert Banner with Badge7 Dot Badge -->
         <div class="gate-status-banner approved" id="gateBanner">
-          <span class="status-badge approved" id="gateBadge">APPROVED</span>
+          <span class="badge-ghost" id="gateBadge" style="background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);">
+            <span class="badge-dot dot-success" id="gateDot" aria-hidden="true"></span>
+            <span id="gateBadgeText">APPROVED</span>
+          </span>
           <div class="status-content">
             <h3 id="gateTitle">SAFE FOR DOWNSTREAM LLM INGESTION</h3>
             <p id="gateMessage">Zero residual PII detected post-redaction. Document structure and relational context verified.</p>
@@ -1088,10 +1297,12 @@ Assigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
 
     // Set Gate Status Banner State
     function setGateStatus(status, title, message) {
+      const gateDot = document.getElementById('gateDot');
+      const gateBadgeText = document.getElementById('gateBadgeText');
       if (status === 'approved') {
         gateBanner.className = 'gate-status-banner approved';
-        gateBadge.className = 'status-badge approved';
-        gateBadge.textContent = 'APPROVED';
+        if (gateDot) gateDot.className = 'badge-dot dot-success';
+        if (gateBadgeText) gateBadgeText.textContent = 'APPROVED';
         gateTitle.textContent = title || 'SAFE FOR DOWNSTREAM LLM INGESTION';
         gateMessage.textContent = message || 'Zero residual PII detected post-redaction.';
         downloadSanitizedBtn.disabled = false;
@@ -1099,8 +1310,8 @@ Assigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
         downloadSanitizedBtn.style.cursor = 'pointer';
       } else {
         gateBanner.className = 'gate-status-banner quarantined';
-        gateBadge.className = 'status-badge quarantined';
-        gateBadge.textContent = 'QUARANTINED';
+        if (gateDot) gateDot.className = 'badge-dot dot-danger';
+        if (gateBadgeText) gateBadgeText.textContent = 'QUARANTINED';
         gateTitle.textContent = title || 'SECURITY GATE VIOLATION — ACCESS BLOCKED';
         gateMessage.textContent = message || 'Potential residual PII leak or incomplete extraction detected.';
         downloadSanitizedBtn.disabled = true;
