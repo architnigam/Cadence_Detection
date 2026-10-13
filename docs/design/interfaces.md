@@ -267,3 +267,15 @@ The schemas in sections 2-4 describe the ingestion/orchestration boundary. The s
 - **Release:** `extracted` is only an extraction-stage status. Only the full orchestration/redaction/rescan checks may produce `safe_for_llm`; placeholder stages remain blocked by the orchestrator.
 
 These are required adapter mappings, not a claim that the current default orchestrator is wired to the standalone extraction engine.
+
+## Integration acceptance checklist for the `test` branch
+
+Before calling the pipeline end-to-end, the integration owner must verify:
+
+- `extract_document` output is converted into `NormalizedBlock` objects without dropping source locations, media issues, OCR boxes or completeness flags.
+- OCR confidence is converted from the extraction package's 0-100 scale to the orchestrator's 0-1 scale before threshold checks.
+- Detection findings are converted from the standalone detector/redaction models into `PIIFinding` objects with stable source locations and no raw values in logs.
+- Redaction output is converted back into the orchestration `RedactedBlock`/`RedactionResult` schema, preserving block order and document identity.
+- `SafeReleaseGate` residual findings and quality warnings are represented as a failed rescan or quarantine decision; they cannot be treated as informational warnings.
+- The Streamlit UI is not described as a PDF/PPTX/DOCX live walkthrough until it calls the same integrated path rather than fixture helpers or `.txt` upload handling.
+- A full run on approved local fixtures produces an evidence report with input format, extraction status, detected categories, redaction count, residual count and quarantine reasons, without raw PII.

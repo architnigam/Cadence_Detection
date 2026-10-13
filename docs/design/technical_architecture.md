@@ -10,6 +10,22 @@
 
 The Cadence Detection System is a modular, high-assurance document sanitization pipeline engineered to process complex institutional documents across PDF, PowerPoint (PPTX), and Word (DOCX) formats. It detects, classifies, and redacts Personally Identifiable Information (PII) before any transmission to external Large Language Models (LLMs).
 
+## Current implementation and integration boundary (`test` branch)
+
+The implementation is modular but not yet a single implicit import chain. The current components and their real entry points are:
+
+| Component | Implemented entry point | Current behavior | Integration note |
+|---|---|---|---|
+| Ingestion and validation | `src/cadence_detection/ingestion/` | Creates manifests, validates PDF/PPTX/DOCX inputs, dispatches adapter calls, and fails closed on incomplete or placeholder stages. | Owns the stable orchestration contracts. |
+| Extraction and OCR | `cadence_detection.extraction.extract_document` | Native PDF/PPTX/DOCX extraction, local OCR, source locations, confidence, media handling and extraction coverage. | Returns `ExtractionResult`; requires the mapping documented in `interfaces.md`. |
+| PII detection | `cadence_detection.detection.pii_detector.detect` | Deterministic baseline for email, context-gated phone and synthetic employee IDs. | It is not yet a complete production taxonomy or a direct `PIIDetectorAdapter`. |
+| Redaction | `TextRedactor.redact_document` | Overlap-safe, right-to-left replacement with stable typed tokens. | Uses the redaction package's `Block`/`Finding` models. |
+| Release gate | `SafeReleaseGate.evaluate` | Quarantines residual regex matches, incomplete extraction and low-confidence blocks. | Gate output must be translated to the Person 1 release decision. |
+| Evaluation | `evaluate_bundle` and `pipeline_checks` | Independent metrics and contract checks; does not authorize release. | Requires reviewed labels and predictions. |
+| Demonstration UI | `app/app.py` | Shows fixture-based redaction/gate behavior and accepts local `.txt` input. | PDF/PPTX/DOCX upload and full adapter wiring remain integration work. |
+
+The architecture must therefore distinguish implemented component capabilities from the final integrated release path. No document is safe for an LLM until extraction, detection, redaction and rescan have passed through the Person 1 gate using real adapters.
+
 ### Key Architectural Tenets
 1. **Local-Only Processing Boundary:** No raw text, raster image, or metadata leaves the trusted perimeter.
 2. **Deterministic & Idempotent:** Document IDs derive cryptographically from content byte SHA-256.
@@ -103,8 +119,9 @@ graph TB
   2. *OCR Fallback:* Activated automatically when pages have no extractable native text, or when text density falls below `min_text_density_threshold` (e.g., scanned contracts, screenshot attachments).
 - **Risk Policy v6.0 Handling:** 35 scanned pages consisting of full-page raster scans and embedded screen captures (e.g., page 9 identity cards, page 18 signed attestation, page 20 audit log). The PDF adapter automatically routes each raster page through the local OCR engine, calculating per-block spatial bounding boxes and confidence scores.
 - **Low-Confidence OCR Thresholding:**
-  - Blocks with OCR confidence $< 0.75$ trigger a warning.
-  - Documents with mean OCR confidence $< 0.70$ or containing illegible critical blocks are quarantined (`LOW_OCR_CONFIDENCE`).
+  - The standalone extraction default is 60/100 (`ExtractionOptions.min_ocr_confidence`).
+  - The Person 1 orchestration configuration uses a normalized 0.70 threshold after the required 0-100 to 0-1 conversion.
+  - Documents with low-confidence or incomplete critical blocks are quarantined (`LOW_OCR_CONFIDENCE` / `EXTRACTION_INCOMPLETE`).
 
 ### 3.2 PPTX & DOCX: Office Open XML & Embedded Media
 - **PPTX Traversal:** Traverses slide shapes, group shapes, structured tables, and speaker notes. Handles the 9-slide Organizational Pack with divisional hierarchies and RACI matrices.
@@ -172,6 +189,8 @@ The orchestrator enforces a zero-bypass Privacy Gate. A document receives `Relea
 If any single clause evaluates to false:
 - `status = ProcessingStatus.quarantined`
 - `release_decision = ReleaseDecision.not_safe_for_llm`
+
+On the current branch, this is an enforced contract for the Person 1 orchestrator, but the standalone extraction, detection, redaction and evaluation packages still require explicit adapters to satisfy it. Placeholder adapters are intentionally rejected with `MISSING_STEP`; successful fixture tests must not be reported as end-to-end case-study results.
 
 ---
 

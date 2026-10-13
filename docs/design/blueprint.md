@@ -12,6 +12,14 @@ The Cadence Detection pipeline enforces a zero-leakage local redaction boundary 
 
 Unredacted files or raw PII must never reach external Large Language Models (LLMs) or public cloud APIs. This document defines the functional lifecycle of every document processed by the pipeline, detailing the stages, security boundaries, and gate policies from initial upload to sanitized release or quarantine.
 
+## Implementation status on the `test` branch
+
+The repository now contains implemented components for local PDF/DOCX/PPTX extraction and OCR (`src/cadence_detection/extraction/`), a deterministic baseline detector (`src/cadence_detection/detection/pii_detector.py`), text redaction and a residual-leakage gate (`src/cadence_detection/redaction/`), an independent evaluator (`src/cadence_detection/evaluation/`), and a Streamlit demonstration interface (`app/app.py`).
+
+The Person 1 orchestrator remains the fail-closed integration boundary. It exposes adapter contracts for those components and blocks `safe_for_llm` when any placeholder adapter is still active. The standalone extraction result and the orchestration contracts are not interchangeable: an integration adapter must map document IDs, block kinds, source locations, OCR confidence units, completeness issues and pagination before the results enter the release gate. The exact mapping is recorded in [interfaces.md](interfaces.md).
+
+The current UI demonstrates redaction and gate behavior using local fixtures and optional `.txt` upload. It is not yet a production upload path for PDF, PPTX and DOCX. Therefore, the flow below is the target end-to-end blueprint, while the implementation status and test evidence must be presented separately from measured final case-study outcomes.
+
 ---
 
 ## 2. End-to-End Functional Flowchart
