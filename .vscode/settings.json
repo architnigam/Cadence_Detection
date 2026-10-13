@@ -1,0 +1,17 @@
+{
+  "git.openRepositoryInParentFolders": "never",
+  "git.repositoryScanIgnoredFolders": [
+    ".local",
+    "tmp",
+    "node_modules",
+    ".venv"
+  ],
+  "files.watcherExclude": {
+    "**/.local/**": true,
+    "**/tmp/**": true
+  },
+  "search.exclude": {
+    "**/.local": true,
+    "**/tmp": true
+  }
+}
