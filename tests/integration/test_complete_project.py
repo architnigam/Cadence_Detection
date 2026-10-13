@@ -185,7 +185,7 @@ class UploadServerTests(unittest.TestCase):
 
     def test_ui_and_health(self):
         self.assertEqual(json.load(self.request('/health'))['status'],'ok')
-        html=self.request('/').read().decode();self.assertIn('Evidence privacy review',html);self.assertIn(self.server.token,html)
+        html=self.request('/').read().decode();self.assertIn('id="file"',html);self.assertIn('id="run"',html);self.assertIn(self.server.token,html)
 
     def test_unauthorized_and_cross_origin_rejected(self):
         for headers in [{},{'X-Cadence-Token':self.server.token,'Origin':'http://evil.invalid'}]:

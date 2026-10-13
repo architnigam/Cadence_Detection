@@ -8,7 +8,7 @@ The merged project now has a real PDF/PPTX/DOCX upload and command-line pipeline
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_local.ps1 app
 ```
 
-Open http://127.0.0.1:8765 and upload an actual source file. The interface shows real stage progress, categories, source locations, masked previews and review warnings. Only approved jobs can export text. The original text is available only through an explicit restricted local inspection action.
+Open http://127.0.0.1:8767 and upload an actual source file. The interface shows real stage progress, categories, source locations, masked previews and review warnings. Only approved jobs can export text. The original text is available only through an explicit restricted local inspection action.
 
 ```powershell
 # Real CLI processing; code 2 means review is required for at least one input.
@@ -30,7 +30,7 @@ python -m spacy download en_core_web_sm
 
 Provision a local Tesseract executable with English language data, or configure the Node Tesseract backend as described in [the extraction guide](docs/person2_extraction.md). The supported English NER model is `en_core_web_sm` 3.8.0 with spaCy 3.8.x. Model installation is an explicit setup action; runtime uploads do not download models or send documents outside the machine. SVG conversion additionally needs CairoSVG or configured local Sharp. Windows metafile conversion uses Pillow/GDI; unsupported conversions block release.
 
-`python scripts/run_app.py --port 8765` launches the dependency-light local UI. Streamlit is no longer required. The legacy `app/app.py` entry point launches the same real application.
+`python scripts/run_app.py --port 8767` launches the dependency-light local UI. Streamlit is no longer required. The legacy `app/app.py` entry point launches the same real application.
 
 ## Team ownership and beginner guide
 
