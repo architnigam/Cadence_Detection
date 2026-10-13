@@ -3,6 +3,7 @@
   "dataset_kind": "synthetic",
   "split": "held_out",
   "provisional_labels_included": false,
+  "evaluation_status": "evaluated",
   "scope": {
     "selected_documents": 3,
     "evaluated_blocks": 6,
@@ -19,6 +20,67 @@
     "precision": 0.8421052631578947,
     "recall": 0.8888888888888888,
     "f1": 0.8648648648648649
+  },
+  "exact_text_errors": {
+    "false_negatives": [
+      {
+        "document_id": "syn_pdf",
+        "block_id": "narrative",
+        "entity_type": "PASSPORT",
+        "start": 225,
+        "end": 234,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "narrative",
+        "image_only": true
+      },
+      {
+        "document_id": "syn_pptx",
+        "block_id": "contacts",
+        "entity_type": "PERSON",
+        "start": 0,
+        "end": 11,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "table",
+        "image_only": false
+      }
+    ],
+    "false_positives": [
+      {
+        "document_id": "syn_docx",
+        "block_id": "negative",
+        "entity_type": "PERSON",
+        "start": 0,
+        "end": 8,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "body",
+        "image_only": false
+      },
+      {
+        "document_id": "syn_pptx",
+        "block_id": "contacts",
+        "entity_type": "EMAIL",
+        "start": 32,
+        "end": 51,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "table",
+        "image_only": false
+      },
+      {
+        "document_id": "syn_pptx",
+        "block_id": "contacts",
+        "entity_type": "PERSON",
+        "start": 0,
+        "end": 10,
+        "count": 1,
+        "page_or_slide": 1,
+        "source_kind": "table",
+        "image_only": false
+      }
+    ]
   },
   "overlap_text_diagnostic": {
     "tp": 17,

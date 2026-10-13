@@ -42,11 +42,11 @@ def make_fixture():
         [("Zoë Example", "PERSON"), ("zoe@example.invalid", "EMAIL"), ("+1 (555) 0114", "PHONE")], "table")
     add("syn_pptx", "raci", "Z. Example is accountable. R, A, C and I describe roles.", [("Z. Example", "PERSON")], "table")
     cases = [("EMP-TEST-001", "EMPLOYEE_ID"), ("DIR-TEST-002", "DIRECTOR_ID"),
-             ("VENDOR-PERSON-003", "VENDOR_PERSON_ID"), ("14 July 1991", "DATE_OF_BIRTH"),
-             ("19 Fiction Lane, Test City", "HOME_ADDRESS"), ("900-55-2043", "NATIONAL_ID"),
-             ("AQBPR7741L", "TAX_ID"), ("TK4820913", "PASSPORT"),
+             ("VENDOR-PERSON-003", "VENDOR_PERSON_ID"), ("7 May 1994", "DATE_OF_BIRTH"),
+             ("19 Fiction Lane, Test City", "HOME_ADDRESS"), ("000-12-3456", "NATIONAL_ID"),
+             ("EXAMP1234L", "TAX_ID"), ("ZZ1234567", "PASSPORT"),
              ("TEST-ACCOUNT-004", "BANK_ACCOUNT"), ("4111 1111 1111 1111", "PAYMENT_CARD"),
-             ("8827", "PARTIAL_IDENTIFIER")]
+             ("6790", "PARTIAL_IDENTIFIER")]
     add("syn_pdf", "narrative", "Customer record: " + "; ".join(et + " " + value for value, et in cases) + ".", cases, "narrative")
     add("syn_docx", "users", "Reviewer Noor Example uses noor@example.invalid.", [("Noor Example", "PERSON"), ("noor@example.invalid", "EMAIL")], "table")
     add("syn_docx", "negative", "OneTrust and Ironclad support Tier 2 reviews every 24 months. Policy GRP-POL-001, question DDQ-004, USD 2.4m and 11 March 2026 are business context.", [], "body")

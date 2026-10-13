@@ -1,6 +1,6 @@
 # Independent evaluation report
 
-Dataset: **synthetic**. Split: **held_out**.
+Dataset: **synthetic**. Split: **held_out**. Status: **evaluated**.
 
 These results evaluate the supplied predictions. Synthetic predictions exercise the evaluator, not a working detector.
 
@@ -95,6 +95,18 @@ Equal weights across applicable dimensions. Target: at least 80% per document. T
 | syn_docx | approved | 0 | False |
 | syn_pdf | approved | 1 | True |
 | syn_pptx | approved | 0 | False |
+
+## Exact error locations
+
+Values remain in the local annotation bundle. Offsets refer to original frozen block text.
+
+| Error | Document | Block | Type | Start | End | Count |
+|---|---|---|---|---:|---:|---:|
+| false_negatives | syn_pdf | narrative | PASSPORT | 225 | 234 | 1 |
+| false_negatives | syn_pptx | contacts | PERSON | 0 | 11 | 1 |
+| false_positives | syn_docx | negative | PERSON | 0 | 8 | 1 |
+| false_positives | syn_pptx | contacts | EMAIL | 32 | 51 | 1 |
+| false_positives | syn_pptx | contacts | PERSON | 0 | 10 | 1 |
 
 ## Limitations
 

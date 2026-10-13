@@ -80,7 +80,7 @@
       "page_or_slide": 1,
       "source_kind": "narrative",
       "reading_order": 2,
-      "text": "Customer record: EMPLOYEE_ID EMP-TEST-001; DIRECTOR_ID DIR-TEST-002; VENDOR_PERSON_ID VENDOR-PERSON-003; DATE_OF_BIRTH 14 July 1991; HOME_ADDRESS 19 Fiction Lane, Test City; NATIONAL_ID 900-55-2043; TAX_ID AQBPR7741L; PASSPORT TK4820913; BANK_ACCOUNT TEST-ACCOUNT-004; PAYMENT_CARD 4111 1111 1111 1111; PARTIAL_IDENTIFIER 8827.",
+      "text": "Customer record: EMPLOYEE_ID EMP-TEST-001; DIRECTOR_ID DIR-TEST-002; VENDOR_PERSON_ID VENDOR-PERSON-003; DATE_OF_BIRTH 7 May 1994; HOME_ADDRESS 19 Fiction Lane, Test City; NATIONAL_ID 000-12-3456; TAX_ID EXAMP1234L; PASSPORT ZZ1234567; BANK_ACCOUNT TEST-ACCOUNT-004; PAYMENT_CARD 4111 1111 1111 1111; PARTIAL_IDENTIFIER 6790.",
       "image_only": true,
       "extraction_complete": true,
       "annotation_status": "adjudicated"
@@ -208,7 +208,7 @@
       "block_id": "narrative",
       "entity_type": "DATE_OF_BIRTH",
       "start": 119,
-      "end": 131,
+      "end": 129,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -216,8 +216,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "HOME_ADDRESS",
-      "start": 146,
-      "end": 172,
+      "start": 144,
+      "end": 170,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -225,8 +225,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "NATIONAL_ID",
-      "start": 186,
-      "end": 197,
+      "start": 184,
+      "end": 195,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -234,8 +234,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "TAX_ID",
-      "start": 206,
-      "end": 216,
+      "start": 204,
+      "end": 214,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -243,8 +243,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "PASSPORT",
-      "start": 227,
-      "end": 236,
+      "start": 225,
+      "end": 234,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -252,8 +252,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "BANK_ACCOUNT",
-      "start": 251,
-      "end": 267,
+      "start": 249,
+      "end": 265,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -261,8 +261,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "PAYMENT_CARD",
-      "start": 282,
-      "end": 301,
+      "start": 280,
+      "end": 299,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -270,8 +270,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "PARTIAL_IDENTIFIER",
-      "start": 322,
-      "end": 326,
+      "start": 320,
+      "end": 324,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -411,7 +411,7 @@
       "block_id": "narrative",
       "entity_type": "DATE_OF_BIRTH",
       "start": 119,
-      "end": 131,
+      "end": 129,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -419,8 +419,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "HOME_ADDRESS",
-      "start": 146,
-      "end": 172,
+      "start": 144,
+      "end": 170,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -428,8 +428,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "NATIONAL_ID",
-      "start": 186,
-      "end": 197,
+      "start": 184,
+      "end": 195,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -437,8 +437,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "TAX_ID",
-      "start": 206,
-      "end": 216,
+      "start": 204,
+      "end": 214,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -446,8 +446,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "BANK_ACCOUNT",
-      "start": 251,
-      "end": 267,
+      "start": 249,
+      "end": 265,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -455,8 +455,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "PAYMENT_CARD",
-      "start": 282,
-      "end": 301,
+      "start": 280,
+      "end": 299,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -464,8 +464,8 @@
       "document_id": "syn_pdf",
       "block_id": "narrative",
       "entity_type": "PARTIAL_IDENTIFIER",
-      "start": 322,
-      "end": 326,
+      "start": 320,
+      "end": 324,
       "adjudication_status": "adjudicated",
       "reviewer": "synthetic_fixture"
     },
@@ -535,7 +535,7 @@
       "sanitized_blocks": [
         {
           "block_id": "narrative",
-          "text": "Customer record: EMPLOYEE_ID [EMPLOYEE_ID_1]; DIRECTOR_ID [DIRECTOR_ID_1]; VENDOR_PERSON_ID [VENDOR_PERSON_ID_1]; DATE_OF_BIRTH [DATE_OF_BIRTH_1]; HOME_ADDRESS [HOME_ADDRESS_1]; NATIONAL_ID [NATIONAL_ID_1]; TAX_ID [TAX_ID_1]; PASSPORT TK4820913; BANK_ACCOUNT [BANK_ACCOUNT_1]; PAYMENT_CARD [PAYMENT_CARD_1]; PARTIAL_IDENTIFIER [PARTIAL_IDENTIFIER_1]."
+          "text": "Customer record: EMPLOYEE_ID [EMPLOYEE_ID_1]; DIRECTOR_ID [DIRECTOR_ID_1]; VENDOR_PERSON_ID [VENDOR_PERSON_ID_1]; DATE_OF_BIRTH [DATE_OF_BIRTH_1]; HOME_ADDRESS [HOME_ADDRESS_1]; NATIONAL_ID [NATIONAL_ID_1]; TAX_ID [TAX_ID_1]; PASSPORT ZZ1234567; BANK_ACCOUNT [BANK_ACCOUNT_1]; PAYMENT_CARD [PAYMENT_CARD_1]; PARTIAL_IDENTIFIER [PARTIAL_IDENTIFIER_1]."
         },
         {
           "block_id": "visual",

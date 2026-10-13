@@ -26,6 +26,8 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(r["overlap_text_diagnostic"]["tp"], 17)
         self.assertEqual(r["visual_region_detection"]["fn"], 1)
         self.assertEqual(r["by_text_origin"]["image_only"]["gold_occurrences"], 11)
+        self.assertEqual(sum(e["count"] for e in r["exact_text_errors"]["false_negatives"]), 2)
+        self.assertEqual(sum(e["count"] for e in r["exact_text_errors"]["false_positives"]), 3)
 
     def test_perfect_predictions_score_one(self):
         self.b["predictions"] = copy.deepcopy(self.b["gold"])
@@ -124,7 +126,7 @@ class EvaluationTests(unittest.TestCase):
 
     def test_clean_fixture_has_zero_known_residuals(self):
         result = self.b["results"][0]
-        result["sanitized_blocks"][0]["text"] = result["sanitized_blocks"][0]["text"].replace("TK4820913", "[PASSPORT_1]")
+        result["sanitized_blocks"][0]["text"] = result["sanitized_blocks"][0]["text"].replace("ZZ1234567", "[PASSPORT_1]")
         m = evaluate_bundle(self.b)["release_audit"]["syn_pdf"]
         self.assertFalse(m["unsafe_approval"])
         self.assertEqual(m["known_residual_occurrences"], 0)
@@ -168,7 +170,7 @@ class EvaluationTests(unittest.TestCase):
     def test_reports_do_not_include_raw_pii(self):
         r = evaluate_bundle(self.b)
         encoded = json.dumps(r) + render_markdown(r)
-        for value in ("TK4820913", "zoe@example.invalid", "Zoë Example", "19 Fiction Lane"):
+        for value in ("ZZ1234567", "zoe@example.invalid", "Zoë Example", "19 Fiction Lane"):
             self.assertNotIn(value, encoded)
 
     def test_pending_negative_blocks_are_never_scored(self):
@@ -236,7 +238,7 @@ class EvaluationTests(unittest.TestCase):
             run = subprocess.run([sys.executable, str(ROOT / "scripts/evaluate.py"), str(p), "--output", str(out), "--fail-on-unsafe-approval"], capture_output=True, text=True)
             self.assertEqual(run.returncode, 1, run.stderr)
             self.assertTrue(out.with_suffix(".json").exists())
-            self.assertNotIn("TK4820913", out.with_suffix(".md").read_text(encoding="utf-8"))
+            self.assertNotIn("ZZ1234567", out.with_suffix(".md").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

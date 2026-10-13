@@ -151,6 +151,24 @@ def _exact(gold, predictions):
     return _counts(tp, sum(p.values()) - tp, sum(g.values()) - tp)
 
 
+def _errors(gold, predictions, blocks):
+    """Source-mapped error counts without copying sensitive substrings."""
+    g = Counter(_key(x) for x in gold)
+    p = Counter(_key(x) for x in predictions)
+
+    def summarize(counts):
+        records = []
+        for (did, bid, kind, start, end), count in sorted(counts.items()):
+            block = blocks[(did, bid)]
+            records.append({"document_id": did, "block_id": bid, "entity_type": kind,
+                            "start": start, "end": end, "count": count,
+                            "page_or_slide": block.get("page_or_slide"),
+                            "source_kind": block["source_kind"], "image_only": block["image_only"]})
+        return records
+
+    return {"false_negatives": summarize(g - p), "false_positives": summarize(p - g)}
+
+
 def _iou(g, p):
     if (g["document_id"], g["block_id"], g["entity_type"]) != (p["document_id"], p["block_id"], p["entity_type"]):
         return 0.0
@@ -336,11 +354,13 @@ def evaluate_bundle(bundle, split="held_out", include_provisional=False, overlap
     report = {
         "schema_version": 1, "dataset_kind": bundle["dataset_kind"], "split": split,
         "provisional_labels_included": include_provisional,
+        "evaluation_status": "evaluated" if eligible else "no_eligible_reviewed_blocks",
         "scope": {"selected_documents": len(selected_ids), "evaluated_blocks": len(eligible),
                   "excluded_unadjudicated_blocks": sum(k[0] in selected_ids and k not in eligible for k in blocks),
                   "excluded_predictions": sum(f["document_id"] in selected_ids and (f["document_id"], f["block_id"]) not in eligible for f in bundle["predictions"]),
                   "negative_blocks": sum(not any((f["document_id"], f["block_id"]) == k for f in gold) for k in eligible)},
         "exact_text": _exact(gt, pt),
+        "exact_text_errors": _errors(gt, pt, blocks),
         "overlap_text_diagnostic": dict(_overlap(gt, pt, overlap_threshold), iou_threshold=overlap_threshold),
         "visual_region_detection": dict(_overlap(gv, pv, overlap_threshold), iou_threshold=overlap_threshold),
         "by_category": _grouped(gt, pt, lambda f: f["entity_type"], ENTITY_TYPES - VISUAL_TYPES),
@@ -378,7 +398,7 @@ def _percent(n):
 def render_markdown(report):
     """Render aggregate evidence only. Never copy raw input into this report."""
     lines = ["# Independent evaluation report", "",
-             f"Dataset: **{report['dataset_kind']}**. Split: **{report['split']}**.", "",
+             f"Dataset: **{report['dataset_kind']}**. Split: **{report['split']}**. Status: **{report['evaluation_status']}**.", "",
              "These results evaluate the supplied predictions. Synthetic predictions exercise the evaluator, not a working detector.", "",
              f"Evaluated blocks: {report['scope']['evaluated_blocks']}. Negative blocks: {report['scope']['negative_blocks']}. "
              f"Excluded provisional blocks: {report['scope']['excluded_unadjudicated_blocks']}.", ""]
@@ -406,5 +426,10 @@ def render_markdown(report):
     lines += ["", "## Independent release audit", "", "| Document | Claimed status | Known residuals | Unsafe approval |", "|---|---|---:|---|"]
     for did, m in report["release_audit"].items():
         lines.append(f"| {did} | {m['status']} | {m['known_residual_occurrences']} | {m['unsafe_approval']} |")
+    lines += ["", "## Exact error locations", "", "Values remain in the local annotation bundle. Offsets refer to original frozen block text.", "",
+              "| Error | Document | Block | Type | Start | End | Count |", "|---|---|---|---|---:|---:|---:|"]
+    for kind, errors in report["exact_text_errors"].items():
+        for e in errors:
+            lines.append(f"| {kind} | {e['document_id']} | {e['block_id']} | {e['entity_type']} | {e['start']} | {e['end']} | {e['count']} |")
     lines += ["", "## Limitations", ""] + ["- " + s for s in report["limitations"]]
     return "\n".join(lines) + "\n"
