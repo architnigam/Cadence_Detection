@@ -95,9 +95,9 @@ _DATE_LIKE_PHONE = re.compile(r"\d{4}[-/.]\d{1,2}[-/.]\d{1,2}")
 
 # EMPLOYEE_ID: synthetic EMP-<digits> test fixture only – NOT an official identifier.
 _EMP_ID_PATTERN = re.compile(
-    r"(?<![A-Za-z0-9\-])"
+    r"(?<![\w.-])"
     r"EMP-\d{3,8}"
-    r"(?![A-Za-z0-9\-])",
+    r"(?![\w.-])",
     re.UNICODE,
 )
 

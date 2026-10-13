@@ -353,6 +353,18 @@ class TestEmployeeIdNegative(unittest.TestCase):
         empids = [f for f in findings if f.entity_type == "EMPLOYEE_ID"]
         self.assertEqual(len(empids), 0)
 
+    def test_embedded_after_underscore_does_not_match(self):
+        blk = _make_block("record_EMP-12345 is a larger token.")
+        findings = detect(blk)
+        empids = [f for f in findings if f.entity_type == "EMPLOYEE_ID"]
+        self.assertEqual(len(empids), 0)
+
+    def test_dot_suffix_does_not_match_partial_id(self):
+        blk = _make_block("EMP-12345.7 is not a standalone employee ID.")
+        findings = detect(blk)
+        empids = [f for f in findings if f.entity_type == "EMPLOYEE_ID"]
+        self.assertEqual(len(empids), 0)
+
     def test_lowercase_prefix_no_match(self):
         """Pattern is case-sensitive; 'emp-12345' must not match."""
         blk = _make_block("emp-12345 is lowercase.")
@@ -889,6 +901,25 @@ class TestEmployeeIdBoundary(unittest.TestCase):
         self.assertEqual(len(empids), 1)
         f = empids[0]
         self.assertEqual(text[f.start:f.end], "EMP-12345")
+
+    def test_emp_id_contract_metadata_and_exact_offsets(self):
+        text = "Review EMP-12345 before closing."
+        finding = next(
+            f for f in detect(Block("doc-id", "block-id", text))
+            if f.entity_type == "EMPLOYEE_ID"
+        )
+
+        self.assertEqual(text[finding.start:finding.end], "EMP-12345")
+        self.assertEqual(finding.start, text.index("EMP-12345"))
+        self.assertEqual(finding.end, finding.start + len("EMP-12345"))
+        self.assertEqual(finding.document_id, "doc-id")
+        self.assertEqual(finding.block_id, "block-id")
+        self.assertEqual(finding.confidence, 0.80)
+        self.assertEqual(finding.detector, DETECTOR_ID)
+        self.assertEqual(
+            finding.source_location,
+            f"block-id:{finding.start}:{finding.end}",
+        )
 
 
 # 17. Unicode offsets – extended coverage for new phone formats
