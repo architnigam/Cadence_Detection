@@ -29,13 +29,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Theme and Responsive CSS
-def apply_custom_css(theme_mode="Dark"):
-    bg_color = "#0f172a" if theme_mode == "Dark" else "#f8fafc"
-    card_bg = "#1e293b" if theme_mode == "Dark" else "#ffffff"
-    text_color = "#f8fafc" if theme_mode == "Dark" else "#0f172a"
-    sub_color = "#94a3b8" if theme_mode == "Dark" else "#475569"
-    border_color = "#334155" if theme_mode == "Dark" else "#e2e8f0"
+# Custom Responsive Dark Theme
+def apply_custom_css():
+    bg_color = "#0f172a"
+    card_bg = "#1e293b"
+    text_color = "#f8fafc"
+    sub_color = "#94a3b8"
+    border_color = "#334155"
 
     css = f"""
     <style>
@@ -222,9 +222,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # Theme Toggle
-    theme_choice = st.sidebar.radio("Display Theme:", ["Dark", "Light"], horizontal=True)
-    apply_custom_css(theme_choice)
+    apply_custom_css()
 
     st.sidebar.markdown("---")
     st.sidebar.header("📁 Document Ingestion")
