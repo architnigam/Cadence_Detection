@@ -1,5 +1,5 @@
-# tests/redaction
+# Redaction & Gate Tests
 
-Person 4: masking and leakage checks.
+Unit tests for overlap resolution, reverse-offset masking, token stability, and safe-release verification gate.
 
-Status: scaffold; implementation pending.
+Status: Active passing tests.
