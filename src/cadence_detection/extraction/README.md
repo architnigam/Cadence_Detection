@@ -1,5 +1,7 @@
-# src/cadence_detection/extraction
+# Person 2 extraction package
 
-Person 2: PDF OCR, DOCX and PPTX extraction.
+Implemented local extraction adapters, OCR backends, block/result models and CLI.
 
-Status: scaffold; implementation pending.
+Public API: `extract_document(path, options=ExtractionOptions(...), ocr=backend)`.
+
+See `docs/person2_extraction.md` for setup, commands, interface conventions and limits. Extraction results contain raw PII; this package never declares them safe for downstream LLM use.

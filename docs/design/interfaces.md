@@ -9,3 +9,11 @@ Agree before implementation. All statuses below are proposals.
 - Redaction: resolve overlaps, replace from right to left, generate stable document-local typed tokens and preserve block structure. Mapping storage requires explicit local controls.
 - Result: approved, quarantined or failed; sanitized_blocks, category_counts, extraction_coverage, remaining_candidate_count, warnings. Approval requires completed extraction and a passed verification gate; gate criteria to be agreed.
 - Implement adapters independently of UI. Person 1 owns contract changes with all consumers reviewing; fixtures should cover errors and success.
+
+## Implemented Person 2 boundary
+
+The extraction API is implemented in `cadence_detection.extraction`. Its JSON uses `issues` (code/message/location/severity), `ocr_confidence` (lowercase), `units`, `coverage`, `blocks` and `extraction_complete`. See `docs/person2_extraction.md` and the dataclasses in `models.py` for the precise current schema.
+
+Extraction statuses are `extracted`, `quarantined` and `failed`. `extracted` is **not** the final `approved` status proposed above. Person 4's downstream release gate remains unimplemented. DOCX block `page_or_slide` is null because no rendered pagination is claimed; source XML paths provide the location. Template/metadata blocks may also have no page/slide index.
+
+OCR blocks retain line hierarchy and, when supplied by the backend, word offsets/boxes/confidence. Optional detailed PDF crops are supplementary, marked in attributes, and can overlap full-page text. Consumers must handle these overlaps using location as well as text; repeated PII in separate source locations must remain separate occurrences. Native-table cell boxes are labeled by their actual scope rather than claiming exact visual cell bounds.
