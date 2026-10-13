@@ -1,0 +1,931 @@
+{
+  "schema_version": 1,
+  "dataset_kind": "synthetic",
+  "documents": [
+    {
+      "document_id": "syn_pdf",
+      "format": "pdf",
+      "split": "held_out",
+      "extraction_complete": true,
+      "expected_units": [
+        "unit:1"
+      ],
+      "unit_status": {
+        "unit:1": "complete"
+      }
+    },
+    {
+      "document_id": "syn_pptx",
+      "format": "pptx",
+      "split": "held_out",
+      "extraction_complete": true,
+      "expected_units": [
+        "unit:1"
+      ],
+      "unit_status": {
+        "unit:1": "complete"
+      }
+    },
+    {
+      "document_id": "syn_docx",
+      "format": "docx",
+      "split": "held_out",
+      "extraction_complete": true,
+      "expected_units": [
+        "unit:1"
+      ],
+      "unit_status": {
+        "unit:1": "complete"
+      }
+    },
+    {
+      "document_id": "syn_dev",
+      "format": "docx",
+      "split": "development",
+      "extraction_complete": true,
+      "expected_units": [
+        "unit:1"
+      ],
+      "unit_status": {
+        "unit:1": "complete"
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "page_or_slide": 1,
+      "source_kind": "table",
+      "reading_order": 0,
+      "text": "Zoë Example is the DPO. Contact zoe@example.invalid or +1 (555) 0114. Zoë Example chairs the review.",
+      "image_only": false,
+      "extraction_complete": true,
+      "annotation_status": "adjudicated"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "raci",
+      "page_or_slide": 1,
+      "source_kind": "table",
+      "reading_order": 1,
+      "text": "Z. Example is accountable. R, A, C and I describe roles.",
+      "image_only": false,
+      "extraction_complete": true,
+      "annotation_status": "adjudicated"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "page_or_slide": 1,
+      "source_kind": "narrative",
+      "reading_order": 2,
+      "text": "Customer record: EMPLOYEE_ID EMP-TEST-001; DIRECTOR_ID DIR-TEST-002; VENDOR_PERSON_ID VENDOR-PERSON-003; DATE_OF_BIRTH 7 May 1994; HOME_ADDRESS 19 Fiction Lane, Test City; NATIONAL_ID 000-12-3456; TAX_ID EXAMP1234L; PASSPORT ZZ1234567; BANK_ACCOUNT TEST-ACCOUNT-004; PAYMENT_CARD 4111 1111 1111 1111; PARTIAL_IDENTIFIER 6790.",
+      "image_only": true,
+      "extraction_complete": true,
+      "annotation_status": "adjudicated"
+    },
+    {
+      "document_id": "syn_docx",
+      "block_id": "users",
+      "page_or_slide": 1,
+      "source_kind": "table",
+      "reading_order": 3,
+      "text": "Reviewer Noor Example uses noor@example.invalid.",
+      "image_only": false,
+      "extraction_complete": true,
+      "annotation_status": "adjudicated"
+    },
+    {
+      "document_id": "syn_docx",
+      "block_id": "negative",
+      "page_or_slide": 1,
+      "source_kind": "body",
+      "reading_order": 4,
+      "text": "OneTrust and Ironclad support Tier 2 reviews every 24 months. Policy GRP-POL-001, question DDQ-004, USD 2.4m and 11 March 2026 are business context.",
+      "image_only": false,
+      "extraction_complete": true,
+      "annotation_status": "adjudicated"
+    },
+    {
+      "document_id": "syn_dev",
+      "block_id": "dev",
+      "page_or_slide": 1,
+      "source_kind": "body",
+      "reading_order": 5,
+      "text": "Development contact Ava Example.",
+      "image_only": false,
+      "extraction_complete": true,
+      "annotation_status": "adjudicated"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "visual",
+      "page_or_slide": 1,
+      "source_kind": "image",
+      "reading_order": 6,
+      "text": "Employee badge and signed attestation.",
+      "image_only": true,
+      "extraction_complete": true,
+      "annotation_status": "adjudicated"
+    }
+  ],
+  "gold": [
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "PERSON",
+      "start": 0,
+      "end": 11,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "PERSON",
+      "start": 70,
+      "end": 81,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "EMAIL",
+      "start": 32,
+      "end": 51,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "PHONE",
+      "start": 55,
+      "end": 68,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "raci",
+      "entity_type": "PERSON",
+      "start": 0,
+      "end": 10,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "EMPLOYEE_ID",
+      "start": 29,
+      "end": 41,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "DIRECTOR_ID",
+      "start": 55,
+      "end": 67,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "VENDOR_PERSON_ID",
+      "start": 86,
+      "end": 103,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "DATE_OF_BIRTH",
+      "start": 119,
+      "end": 129,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "HOME_ADDRESS",
+      "start": 144,
+      "end": 170,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "NATIONAL_ID",
+      "start": 184,
+      "end": 195,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "TAX_ID",
+      "start": 204,
+      "end": 214,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "PASSPORT",
+      "start": 225,
+      "end": 234,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "BANK_ACCOUNT",
+      "start": 249,
+      "end": 265,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "PAYMENT_CARD",
+      "start": 280,
+      "end": 299,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "PARTIAL_IDENTIFIER",
+      "start": 320,
+      "end": 324,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_docx",
+      "block_id": "users",
+      "entity_type": "PERSON",
+      "start": 9,
+      "end": 21,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_docx",
+      "block_id": "users",
+      "entity_type": "EMAIL",
+      "start": 27,
+      "end": 47,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_dev",
+      "block_id": "dev",
+      "entity_type": "PERSON",
+      "start": 20,
+      "end": 31,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "visual",
+      "entity_type": "PHOTOGRAPH_REGION",
+      "bbox": [
+        0.1,
+        0.1,
+        0.3,
+        0.4
+      ],
+      "start": null,
+      "end": null,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "visual",
+      "entity_type": "SIGNATURE_REGION",
+      "bbox": [
+        0.4,
+        0.7,
+        0.8,
+        0.9
+      ],
+      "start": null,
+      "end": null,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    }
+  ],
+  "predictions": [
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "PERSON",
+      "start": 0,
+      "end": 10,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "PERSON",
+      "start": 70,
+      "end": 81,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "EMAIL",
+      "start": 32,
+      "end": 51,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "PHONE",
+      "start": 55,
+      "end": 68,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "raci",
+      "entity_type": "PERSON",
+      "start": 0,
+      "end": 10,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "EMPLOYEE_ID",
+      "start": 29,
+      "end": 41,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "DIRECTOR_ID",
+      "start": 55,
+      "end": 67,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "VENDOR_PERSON_ID",
+      "start": 86,
+      "end": 103,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "DATE_OF_BIRTH",
+      "start": 119,
+      "end": 129,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "HOME_ADDRESS",
+      "start": 144,
+      "end": 170,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "NATIONAL_ID",
+      "start": 184,
+      "end": 195,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "TAX_ID",
+      "start": 204,
+      "end": 214,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "BANK_ACCOUNT",
+      "start": 249,
+      "end": 265,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "PAYMENT_CARD",
+      "start": 280,
+      "end": 299,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "narrative",
+      "entity_type": "PARTIAL_IDENTIFIER",
+      "start": 320,
+      "end": 324,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_docx",
+      "block_id": "users",
+      "entity_type": "PERSON",
+      "start": 9,
+      "end": 21,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_docx",
+      "block_id": "users",
+      "entity_type": "EMAIL",
+      "start": 27,
+      "end": 47,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_dev",
+      "block_id": "dev",
+      "entity_type": "PERSON",
+      "start": 20,
+      "end": 31,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pdf",
+      "block_id": "visual",
+      "entity_type": "PHOTOGRAPH_REGION",
+      "bbox": [
+        0.1,
+        0.1,
+        0.3,
+        0.4
+      ],
+      "start": null,
+      "end": null,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_pptx",
+      "block_id": "contacts",
+      "entity_type": "EMAIL",
+      "start": 32,
+      "end": 51,
+      "adjudication_status": "adjudicated",
+      "reviewer": "synthetic_fixture"
+    },
+    {
+      "document_id": "syn_docx",
+      "block_id": "negative",
+      "entity_type": "PERSON",
+      "start": 0,
+      "end": 8
+    }
+  ],
+  "results": [
+    {
+      "document_id": "syn_pdf",
+      "status": "approved",
+      "sanitized_blocks": [
+        {
+          "block_id": "narrative",
+          "text": "Customer record: EMPLOYEE_ID [EMPLOYEE_ID_1]; DIRECTOR_ID [DIRECTOR_ID_1]; VENDOR_PERSON_ID [VENDOR_PERSON_ID_1]; DATE_OF_BIRTH [DATE_OF_BIRTH_1]; HOME_ADDRESS [HOME_ADDRESS_1]; NATIONAL_ID [NATIONAL_ID_1]; TAX_ID [TAX_ID_1]; PASSPORT ZZ1234567; BANK_ACCOUNT [BANK_ACCOUNT_1]; PAYMENT_CARD [PAYMENT_CARD_1]; PARTIAL_IDENTIFIER [PARTIAL_IDENTIFIER_1]."
+        },
+        {
+          "block_id": "visual",
+          "text": "Employee badge and signed attestation."
+        }
+      ],
+      "remaining_candidate_count": 0,
+      "verification_passed": true
+    },
+    {
+      "document_id": "syn_pptx",
+      "status": "approved",
+      "sanitized_blocks": [
+        {
+          "block_id": "contacts",
+          "text": "[PERSON_1] is the DPO. Contact [EMAIL_1] or [PHONE_1]. [PERSON_1] chairs the review."
+        },
+        {
+          "block_id": "raci",
+          "text": "[PERSON_1] is accountable. R, A, C and I describe roles."
+        }
+      ],
+      "remaining_candidate_count": 0,
+      "verification_passed": true
+    },
+    {
+      "document_id": "syn_docx",
+      "status": "approved",
+      "sanitized_blocks": [
+        {
+          "block_id": "users",
+          "text": "Reviewer [PERSON_1] uses [EMAIL_1]."
+        },
+        {
+          "block_id": "negative",
+          "text": "OneTrust and Ironclad support Tier 2 reviews every 24 months. Policy GRP-POL-001, question DDQ-004, USD 2.4m and 11 March 2026 are business context."
+        }
+      ],
+      "remaining_candidate_count": 0,
+      "verification_passed": true
+    },
+    {
+      "document_id": "syn_dev",
+      "status": "approved",
+      "sanitized_blocks": [
+        {
+          "block_id": "dev",
+          "text": "Development contact [PERSON_1]."
+        }
+      ],
+      "remaining_candidate_count": 0,
+      "verification_passed": true
+    }
+  ],
+  "structure_reviews": [
+    {
+      "document_id": "syn_pdf",
+      "dimensions": {
+        "headings": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "headings:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "headings:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "reading_order": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "reading_order:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "reading_order:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "block_boundaries": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "block_boundaries:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "block_boundaries:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "table_relationships": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "table_relationships:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "table_relationships:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "neighboring_context": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "neighboring_context:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "neighboring_context:2",
+              "passed": false,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        }
+      },
+      "text_accuracy": {
+        "correct_characters": 90,
+        "reference_characters": 100
+      }
+    },
+    {
+      "document_id": "syn_pptx",
+      "dimensions": {
+        "headings": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "headings:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "headings:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "reading_order": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "reading_order:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "reading_order:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "block_boundaries": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "block_boundaries:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "block_boundaries:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "table_relationships": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "table_relationships:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "table_relationships:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "neighboring_context": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "neighboring_context:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "neighboring_context:2",
+              "passed": false,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        }
+      },
+      "text_accuracy": {
+        "correct_characters": 90,
+        "reference_characters": 100
+      }
+    },
+    {
+      "document_id": "syn_docx",
+      "dimensions": {
+        "headings": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "headings:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "headings:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "reading_order": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "reading_order:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "reading_order:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "block_boundaries": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "block_boundaries:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "block_boundaries:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "table_relationships": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "table_relationships:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "table_relationships:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "neighboring_context": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "neighboring_context:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "neighboring_context:2",
+              "passed": false,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        }
+      },
+      "text_accuracy": {
+        "correct_characters": 90,
+        "reference_characters": 100
+      }
+    },
+    {
+      "document_id": "syn_dev",
+      "dimensions": {
+        "headings": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "headings:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "headings:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "reading_order": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "reading_order:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "reading_order:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "block_boundaries": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "block_boundaries:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "block_boundaries:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "table_relationships": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "table_relationships:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "table_relationships:2",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        },
+        "neighboring_context": {
+          "applicable": true,
+          "checks": [
+            {
+              "check_id": "neighboring_context:1",
+              "passed": true,
+              "source_location": "synthetic unit 1"
+            },
+            {
+              "check_id": "neighboring_context:2",
+              "passed": false,
+              "source_location": "synthetic unit 1"
+            }
+          ]
+        }
+      },
+      "text_accuracy": {
+        "correct_characters": 90,
+        "reference_characters": 100
+      }
+    }
+  ]
+}

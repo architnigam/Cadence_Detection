@@ -3,7 +3,7 @@
 ## Objective and current status
 Build a repeatable, scalable pipeline that extracts text from PDF, PPTX and DOCX evidence, detects and classifies personally identifiable information (PII), and redacts it before any downstream LLM processing. Cadence is a global financial services firm with investment banking, asset management and consumer banking operations.
 
-The repository contains the planning scaffold and an implemented Person 2 extraction/OCR package with automated tests. PDF, DOCX and PPTX adapters, local OCR, vector-image conversion, source locations and a quarantine/completeness contract are available. PII detection, redaction, UI and final submission deck are still pending. Person 1 through Person 5 are placeholders for the actual team members. The earlier summary PDF records the original allocation; current implementation status is maintained here.
+The repository contains the planning scaffold and implemented extraction/OCR, ingestion/orchestration, redaction/gate/demo, and independent evaluation/QA components. End-to-end adapter wiring, PII detection, adjudicated source labels, real PII accuracy measurements and the final submission deck still require completion. Person 1 through Person 5 are team placeholders. The earlier summary PDF records the original allocation; current implementation status is maintained here.
 
 ## Person 2: implemented extraction and OCR
 
@@ -21,9 +21,13 @@ For the risk policy with extra OCR crops for small screenshots:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_person2.ps1 -Files data/source/Cadence_Group_Risk_Management_Policy__v6.0.pdf -Regions config/policy_ocr_regions.json
 ```
 
-Raw block JSON goes to `data/extracted/` and remains ignored by Git. `extracted` means no known extraction blockers; it does **not** mean PII-free. `quarantined` retains recovered text and reports unresolved content. Exit code 2 means at least one input needs review or failed. Only Persons 3 and 4 can add detection/redaction and a downstream release gate.
+Raw block JSON goes to `data/extracted/` and remains ignored by Git. `extracted` means no known extraction blockers; it does **not** mean PII-free. `quarantined` retains recovered text and reports unresolved content. Exit code 2 means at least one input needs review or failed. Extraction outputs must pass detection, redaction and the downstream release gate before any LLM use; standalone extraction never grants release approval.
 
 Coverage includes native/scanned/mixed PDFs, PDF page rotation, Word paragraphs/tables/nested tables/headers/footers/text boxes/notes/comments/field instructions, PowerPoint tables/groups/hidden slides/speaker notes/templates, embedded PNG/SVG/EMF media, and explicit failure paths. Word locations use XML paths instead of invented page numbers. Scanned table structure is represented by OCR line/word geometry; semantic cell reconstruction and the >=80% structure score require independent review.
+
+## Person 5: implemented evaluation and QA
+
+**Person 5 handoff:** see [implementation and run instructions](docs/team/person5_handoff.md). Run `python -m unittest discover -s tests/integration -p "test_*.py" -v` and `python scripts/evaluate.py data/synthetic/evaluation_fixture.json --output output/reports/synthetic_example`. The synthetic report exercises the evaluator with deliberately imperfect predictions; it is not detector accuracy. Source starter labels remain local, provisional and incomplete. Presentation work is deferred at the user's request.
 
 ## What the case study requires
 - A team PowerPoint (.pptx) submission and a 10-15 minute stakeholder walkthrough.
@@ -196,6 +200,7 @@ Cadence_Detection/
 6. Each owner updates progress, evidence, open defects and slide material. Do not commit raw source files, extracted PII, identity mappings or local caches by default.
 
 ## Deliverable status
-- Completed: original planning deliverables plus Person 2 extraction/OCR adapters, vector converters, CLI, source locations, automated tests and real-file processing checks.
-- Review pending: OCR confidence/image warnings and independent structure/text accuracy scoring. See `output/reports/person2_extraction_coverage.md` after generating the report.
-- Pending other roles: PII recognition, redaction, demo, gold annotations, measured PII results, final PPTX and stakeholder rehearsal.
+- Completed: original planning deliverables; Person 1 ingestion/orchestration contracts; Person 2 extraction/OCR adapters, local vector conversion, CLI and source coverage checks; Person 4 redaction/gate/demo components; Person 5 evaluation engine, regression tests, annotation guide, structure rubric, release audit, pipeline-check tooling and QA/defect tracking.
+- Review pending: OCR confidence/image warnings, independent structure/text accuracy scoring and adjudicated source labels. See `output/reports/person2_extraction_coverage.md` and Person 5's handoff.
+- Integration pending: PII detection, real adapters joining the components, end-to-end checks and measured PII results. Existing orchestration placeholders must not approve release.
+- Presentation: final PPTX and stakeholder rehearsal remain outstanding; the Person 5 branch records presentation work as deferred.

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cadence-detection"
 version = "0.1.0"
-description = "Local evidence extraction for Cadence Case Study 2"
+description = "Local document extraction, privacy pipeline components and independent evaluation"
 requires-python = ">=3.10"
 dependencies = ["pypdf>=5,<7", "pypdfium2>=4,<6", "Pillow>=10,<13", "lxml>=5,<7"]
 
