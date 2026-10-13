@@ -22,8 +22,8 @@ end → ascending entity_type.  Exact duplicates (same doc/block/type/start/end)
 are collapsed to the first occurrence.
 
 Known limitations:
-    PHONE/FP-1: keyword + date-like string (e.g. "Tel: 2024-01-01") produces a
-        finding.  Date exclusion is out of scope for increment 1.
+    PHONE: date-shaped values are excluded when they follow a phone context
+        label. Other numeric ambiguity remains context-dependent.
     PHONE/FP-2: standalone uppercase 'M' is the mobile abbreviation; lowercase
         'm' is excluded via (?-i:M) to avoid unit-prefix false positives.
 
@@ -81,14 +81,17 @@ _PHONE_CONTEXT = (
     r"(?:\s*(?:no|num|number|#))?"
     r"\s*[:\-]?\s*"
 )
-# Digit body: optional leading + or (, then ≥ 7 digits with spaces/dashes/parens.
+# Digit body: optional leading + or (, with separators, ending on a digit.
+# Short numbers are accepted only after the context keyword and are filtered
+# to at least three digits in detect().
 _PHONE_DIGITS = (
-    r"(?:\+?\(?\d[\d\s\-\.\(\)]{5,})"
+    r"(?:\+?\(?\d[\d\s\-./\(\)]*\d)"
 )
 _PHONE_PATTERN = re.compile(
     _PHONE_CONTEXT + r"(" + _PHONE_DIGITS + r")",
     re.IGNORECASE | re.UNICODE,
 )
+_DATE_LIKE_PHONE = re.compile(r"\d{4}[-/.]\d{1,2}[-/.]\d{1,2}")
 
 # EMPLOYEE_ID: synthetic EMP-<digits> test fixture only – NOT an official identifier.
 _EMP_ID_PATTERN = re.compile(
@@ -189,6 +192,11 @@ def detect(block: Block) -> list[Finding]:
 
     # PHONE – span_group=1 captures the digit body, excluding the context keyword.
     for m in _PHONE_PATTERN.finditer(block.text):
+        start, end = m.span(1)
+        phone_text = block.text[start:end]
+        digit_count = sum(character.isdigit() for character in phone_text)
+        if digit_count < 3 or _DATE_LIKE_PHONE.fullmatch(phone_text):
+            continue
         raw.append(
             _match_to_finding(
                 m,
@@ -215,4 +223,3 @@ def detect(block: Block) -> list[Finding]:
     deduped = _deduplicate(raw)
     resolved = _resolve_overlaps(deduped)
     return resolved
-

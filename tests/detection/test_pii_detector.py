@@ -199,6 +199,26 @@ class TestPhoneContextualPositive(unittest.TestCase):
         phones = [f for f in findings if f.entity_type == "PHONE"]
         self.assertEqual(len(phones), 1)
 
+    def test_all_supported_long_context_labels(self):
+        for label in ("Telephone", "Mob", "Cell", "Ph", "Contact"):
+            with self.subTest(label=label):
+                phones = [
+                    f
+                    for f in detect(_make_block(f"{label}: 555-867-5309"))
+                    if f.entity_type == "PHONE"
+                ]
+                self.assertEqual(len(phones), 1)
+
+    def test_short_number_with_phone_context(self):
+        text = "Extension: 2468"
+        phones = [f for f in detect(_make_block(text)) if f.entity_type == "PHONE"]
+        self.assertEqual(phones, [])
+
+        text = "Tel: 2468"
+        phones = [f for f in detect(_make_block(text)) if f.entity_type == "PHONE"]
+        self.assertEqual(len(phones), 1)
+        self.assertEqual(text[phones[0].start:phones[0].end], "2468")
+
     def test_phone_span_excludes_keyword(self):
         """The span must cover the digit body only, not the keyword 'Tel:'."""
         text = "Tel: +44 20 7946 0000"
@@ -251,8 +271,8 @@ class TestPhoneNegative(unittest.TestCase):
         self.assertEqual(len(phones), 0)
 
     def test_too_few_digits_with_keyword(self):
-        """Keyword present but digit string too short (< 7 digits)."""
-        blk = _make_block("Tel: 12345")
+        """Keyword present but digit string too short (< 3 digits)."""
+        blk = _make_block("Tel: 42")
         findings = detect(blk)
         phones = [f for f in findings if f.entity_type == "PHONE"]
         self.assertEqual(len(phones), 0)
@@ -816,15 +836,26 @@ class TestPhoneFalsePositiveRegressions(unittest.TestCase):
         self.assertEqual(len(emails), 0)
 
     def test_phone_keyword_with_date_known_fp1_limitation(self):
-        """PHONE/FP-1 limitation: keyword + date currently matches; see module docstring."""
+        """Date-shaped values after a phone keyword must not match."""
         blk = _make_block("Tel: 2024-01-01")
         phones = [f for f in detect(blk) if f.entity_type == "PHONE"]
-        self.assertEqual(
-            len(phones),
-            1,
-            "PHONE/FP-1 known limitation: date-like strings with phone keyword "
-            "currently produce a finding.  See module docstring for details.",
-        )
+        self.assertEqual(len(phones), 0)
+
+    def test_date_like_values_with_common_phone_labels_do_not_match(self):
+        for label in ("Phone", "Mobile", "Contact"):
+            with self.subTest(label=label):
+                phones = [
+                    f
+                    for f in detect(_make_block(f"{label}: 2024/01/15"))
+                    if f.entity_type == "PHONE"
+                ]
+                self.assertEqual(phones, [])
+
+    def test_phone_span_ends_at_last_digit(self):
+        text = "Tel: 2468, then continue"
+        phones = [f for f in detect(_make_block(text)) if f.entity_type == "PHONE"]
+        self.assertEqual(len(phones), 1)
+        self.assertEqual(text[phones[0].start:phones[0].end], "2468")
 
 
 # 16. Employee-ID – end-of-string and boundary — G6
