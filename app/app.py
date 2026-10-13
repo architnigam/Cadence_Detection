@@ -1,6 +1,6 @@
 """Cadence Detection - Safe-Release Redaction and Live Demonstration Interface.
 
-Redaction Engine, Privacy Gate, and Demonstration Interface.
+Gridline Console Edition: Redaction Engine, Privacy Gate, and Demonstration Interface.
 """
 
 import sys
@@ -23,19 +23,20 @@ from tests.redaction.fixtures import get_organizational_pack_fixture, get_risk_p
 
 # Page Configuration (Title, Favicon, Layout)
 st.set_page_config(
-    page_title="Cadence PII Redaction & Safe-Release Privacy Gate",
+    page_title="Cadence PII Redaction & Safe-Release Privacy Gate | Gridline Console",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom Responsive Dark Theme
+# Custom Responsive Gridline Dark Theme
 def apply_custom_css():
-    bg_color = "#0f172a"
-    card_bg = "#1e293b"
+    bg_color = "#0a0f1d"
+    card_bg = "#111827"
     text_color = "#f8fafc"
     sub_color = "#94a3b8"
-    border_color = "#334155"
+    border_color = "rgba(255, 255, 255, 0.09)"
+    primary_cyan = "#0ab1ba"
 
     css = f"""
     <style>
@@ -44,6 +45,13 @@ def apply_custom_css():
             overflow-x: hidden !important;
             max-width: 100vw !important;
             word-break: break-word !important;
+            background-color: {bg_color} !important;
+            color: {text_color} !important;
+        }}
+
+        [data-testid="stSidebar"] {{
+            background-color: #0b1120 !important;
+            border-right: 1px solid {border_color} !important;
         }}
         
         /* Responsive code & text boxes */
@@ -51,6 +59,9 @@ def apply_custom_css():
             white-space: pre-wrap !important;
             word-wrap: break-word !important;
             overflow-x: hidden !important;
+            background-color: #0a0f1d !important;
+            border: 1px solid {border_color} !important;
+            color: #cbd5e1 !important;
         }}
 
         /* Breadcrumb (Base-UI style) */
@@ -58,7 +69,8 @@ def apply_custom_css():
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            font-family: monospace;
             color: {sub_color};
             margin-bottom: 12px;
         }}
@@ -86,12 +98,12 @@ def apply_custom_css():
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 10px;
+            padding: 3px 10px;
             border-radius: 9999px;
-            font-size: 0.785rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            background-color: {card_bg};
-            border: 1px solid {border_color};
+            background-color: #1a2234;
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: {text_color};
         }}
 
@@ -102,10 +114,10 @@ def apply_custom_css():
             display: inline-block;
         }}
 
-        .dot-primary {{ background-color: #3b82f6; }}
-        .dot-success {{ background-color: #10b981; }}
-        .dot-danger {{ background-color: #ef4444; }}
-        .dot-warning {{ background-color: #f59e0b; }}
+        .dot-primary {{ background-color: {primary_cyan}; box-shadow: 0 0 6px {primary_cyan}; }}
+        .dot-success {{ background-color: #10b981; box-shadow: 0 0 6px #10b981; }}
+        .dot-danger {{ background-color: #ef4444; box-shadow: 0 0 6px #ef4444; }}
+        .dot-warning {{ background-color: #f59e0b; box-shadow: 0 0 6px #f59e0b; }}
 
         /* Avatar2 Component */
         .avatar-box {{
@@ -116,8 +128,9 @@ def apply_custom_css():
             height: 38px;
             border-radius: 50%;
             overflow: hidden;
-            outline: 2px solid #3b82f6;
+            outline: 2px solid {primary_cyan};
             outline-offset: 2px;
+            background-color: #1a2234;
         }}
 
         .avatar-box img {{
@@ -126,23 +139,54 @@ def apply_custom_css():
             object-fit: cover;
         }}
 
+        /* Gridline Status Strip */
+        .status-strip {{
+            display: inline-flex;
+            align-items: center;
+            height: 28px;
+            border-radius: 6px;
+            background-color: #1a2234;
+            border: 1px solid {border_color};
+            font-family: monospace;
+            font-size: 0.75rem;
+            margin-bottom: 12px;
+        }}
+
+        .strip-item {{
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-right: 1px solid {border_color};
+            color: {sub_color};
+        }}
+
+        .strip-item:last-child {{
+            border-right: none;
+        }}
+
+        .strip-item.active {{
+            color: {primary_cyan};
+            font-weight: 600;
+        }}
+
         /* Header Contact Ribbon */
         .incident-header {{
             background-color: {card_bg};
             border: 1px solid {border_color};
             border-radius: 10px;
-            padding: 12px 18px;
+            padding: 10px 16px;
             margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: 15px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: {text_color};
         }}
 
         .incident-header a {{
-            color: #3b82f6;
+            color: {primary_cyan};
             text-decoration: none;
             font-weight: 600;
         }}
@@ -162,19 +206,10 @@ def apply_custom_css():
             margin-bottom: 5px;
         }}
 
-        .brand-badge {{
-            font-size: 0.7rem;
-            background-color: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-            padding: 2px 8px;
-            border-radius: 9999px;
-            font-weight: 700;
-        }}
-
         /* Gate Status Badges */
         .approved-banner {{
-            background-color: #064e3b;
-            border: 1px solid #059669;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.12) 0%, rgba(10, 177, 186, 0.08) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.35);
             color: #a7f3d0;
             padding: 14px 18px;
             border-radius: 10px;
@@ -182,8 +217,8 @@ def apply_custom_css():
         }}
 
         .quarantined-banner {{
-            background-color: #7f1d1d;
-            border: 1px solid #dc2626;
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.4);
             color: #fecaca;
             padding: 14px 18px;
             border-radius: 10px;
@@ -193,19 +228,20 @@ def apply_custom_css():
         /* Footer styling */
         .footer-container {{
             border-top: 1px solid {border_color};
-            padding-top: 25px;
+            padding-top: 20px;
             margin-top: 40px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             gap: 15px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            font-family: monospace;
             color: {sub_color};
         }}
 
         .footer-container a {{
-            color: #3b82f6;
+            color: {primary_cyan};
             text-decoration: none;
         }}
     </style>
@@ -214,18 +250,21 @@ def apply_custom_css():
 
 
 def main():
+    apply_custom_css()
+
     # Sidebar Navigation & Settings
     st.sidebar.markdown("""
-    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
-        <span style="font-size: 1.5rem;">🛡️</span>
-        <span style="font-size: 1.15rem; font-weight: 700;">Cadence Privacy</span>
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+        <span style="font-size: 1.5rem; color: #0ab1ba;">🛡️</span>
+        <div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">Cadence Privacy</div>
+            <div style="font-size: 0.7rem; font-family: monospace; color: #94a3b8;">Gridline Console v2.4.2</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-    apply_custom_css()
-
     st.sidebar.markdown("---")
-    st.sidebar.header("📁 Document Ingestion")
+    st.sidebar.header("📁 Evidence Ingestion")
 
     sample_choice = st.sidebar.selectbox(
         "Select Cadence Evidence File:",
@@ -242,7 +281,7 @@ def main():
 
     st.sidebar.markdown("---")
     st.sidebar.header("⚙️ Gate Controls")
-    min_confidence = st.sidebar.slider("Min OCR Quality Threshold:", 0.50, 0.95, 0.65, 0.05)
+    min_confidence = st.sidebar.slider("Min OCR Quality Threshold:", 0.50, 0.95, 0.75, 0.05)
     token_style = st.sidebar.selectbox(
         "Token Placeholder Style:",
         ["[{entity_type}_{index}]", "<{entity_type}_{index}>", "REDACTED_{entity_type}"]
@@ -251,28 +290,48 @@ def main():
     # Breadcrumb4 Component with Dot Separators
     st.markdown("""
     <div class="breadcrumb-box">
-        <a href="#">Library</a>
+        <a href="#">Cadence Financial</a>
         <span style="opacity: 0.5;">•</span>
-        <a href="#">Resources</a>
+        <a href="#">Ingestion Partitions</a>
         <span style="opacity: 0.5;">•</span>
-        <span class="breadcrumb-active">Design Notes</span>
+        <span class="breadcrumb-active">Safe-Release Privacy Gate</span>
     </div>
     """, unsafe_allow_html=True)
 
     # Clickable Logo Header with Avatar2 Profile
     st.markdown("""
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 8px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 10px;">
         <a href="#home" class="brand-logo-container" id="brandLogo">
-            <span>🛡️ Cadence Financial Group</span>
+            <span>🛡️ Cadence Trust Boundary</span>
         </a>
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
             <div class="avatar-box" title="Alex Rivera · Data Protection Officer">
                 <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera">
             </div>
             <div style="line-height: 1.2;">
-                <div style="font-size: 0.85rem; font-weight: 700;">Alex Rivera</div>
-                <div style="font-size: 0.7rem; color: #94a3b8;">DPO Officer</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #f8fafc;">Alex Rivera</div>
+                <div style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">DPO Officer · Tier 1</div>
             </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Gridline Status Strip Pill
+    st.markdown("""
+    <div class="status-strip">
+        <div class="strip-item active">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #0ab1ba; display: inline-block;"></span>
+            Air Gap Ingestion
+        </div>
+        <div class="strip-item" style="color: #10b981;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; display: inline-block;"></span>
+            0 Leaks Detected
+        </div>
+        <div class="strip-item">
+            Gate Tier 1 Active
+        </div>
+        <div class="strip-item" style="color: #0ab1ba;">
+            Model v2.4.2 → v2.4.3
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -295,8 +354,8 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    st.title("PII Redaction & Safe-Release Privacy Gate")
-    st.caption("Case Study 2 · Enterprise LLM Redaction Boundary · Real-Time Verification Engine")
+    st.title("Cadence PII Redaction & Safe-Release Privacy Gate")
+    st.caption("Gridline Dashboard Console · Automated Tokenization & Privacy Gate Enforcement")
 
     # Clickable Incident Contact Bar
     st.markdown("""
@@ -503,7 +562,7 @@ def main():
     st.markdown(f"""
     <div class="footer-container">
         <div>
-            © {current_year} Cadence Financial Group · All rights reserved.
+            © {current_year} Cadence Financial Group · Gridline Enterprise Console.
         </div>
         <div>
             <a href="mailto:dpo@cadence.com">Contact DPO</a> · 
