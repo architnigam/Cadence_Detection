@@ -9,6 +9,8 @@ Entity types detected:
                    Confidence scores are heuristic, not calibrated probabilities.
     PERSON       – Label-gated synthetic name pattern for "Name:" and
                    "Employee Name:" fields.
+    DATE_OF_BIRTH – Label-gated calendar date for "DOB:", "Date of Birth:",
+                   and "Birth Date:" fields.
     EMPLOYEE_ID  – Synthetic EMP-<digits> fixture only.  NOT an official Cadence
                    identifier; replace before production use.
 
@@ -36,6 +38,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import date
 
 DETECTOR_ID = "cadence.detection.pii_detector.v0"
 
@@ -104,6 +107,15 @@ _NAME_PATTERN = re.compile(
     re.UNICODE,
 )
 
+# DATE_OF_BIRTH: context-gated; slash-separated dates are detected without
+# assigning a day-first or month-first interpretation.
+_DOB_PATTERN = re.compile(
+    r"(?i)(?<![\w])(?:dob|date\s+of\s+birth|birth\s+date)\s*:\s*"
+    r"(\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4})"
+    r"(?![\d/-])",
+    re.UNICODE,
+)
+
 # EMPLOYEE_ID: synthetic EMP-<digits> test fixture only – NOT an official identifier.
 _EMP_ID_PATTERN = re.compile(
     r"(?<![\w.-])"
@@ -143,6 +155,24 @@ def _match_to_finding(
         detector=DETECTOR_ID,
         source_location=_make_source_location(block_id, start, end),
     )
+
+
+def _is_valid_dob(value: str) -> bool:
+    """Validate calendar dates without interpreting ambiguous slash dates."""
+    if "-" in value:
+        year, month, day = (int(part) for part in value.split("-"))
+        candidates = [(year, month, day)]
+    else:
+        first, second, year = (int(part) for part in value.split("/"))
+        candidates = [(year, first, second), (year, second, first)]
+
+    for year, month, day in candidates:
+        try:
+            date(year, month, day)
+        except ValueError:
+            continue
+        return True
+    return False
 
 
 def _deduplicate(findings: list[Finding]) -> list[Finding]:
@@ -233,6 +263,21 @@ def detect(block: Block) -> list[Finding]:
                 document_id=block.document_id,
                 block_id=block.block_id,
                 entity_type="PERSON",
+                confidence=0.90,
+                span_group=1,
+            )
+        )
+
+    # DATE_OF_BIRTH – span_group=1 captures the date, excluding the label.
+    for m in _DOB_PATTERN.finditer(block.text):
+        if not _is_valid_dob(m.group(1)):
+            continue
+        raw.append(
+            _match_to_finding(
+                m,
+                document_id=block.document_id,
+                block_id=block.block_id,
+                entity_type="DATE_OF_BIRTH",
                 confidence=0.90,
                 span_group=1,
             )

@@ -362,7 +362,92 @@ class TestPersonContextualNegative(unittest.TestCase):
                 self.assertEqual(people, [])
 
 
-# 7. EMPLOYEE_ID – synthetic positive cases
+# 7. DATE_OF_BIRTH – contextual positive cases
+
+class TestDateOfBirthPositive(unittest.TestCase):
+
+    def test_supported_dob_labels_and_formats(self):
+        cases = (
+            ("DOB: 1985-04-23", "1985-04-23"),
+            ("Date of Birth: 23/04/1985", "23/04/1985"),
+            ("Birth Date: 04/23/1985", "04/23/1985"),
+        )
+        for text, expected in cases:
+            with self.subTest(text=text):
+                findings = [
+                    f for f in detect(_make_block(text))
+                    if f.entity_type == "DATE_OF_BIRTH"
+                ]
+                self.assertEqual(len(findings), 1)
+                self.assertEqual(text[findings[0].start:findings[0].end], expected)
+
+    def test_ambiguous_slash_date_is_detected_without_reinterpretation(self):
+        text = "DOB: 04/05/1985"
+        finding = next(
+            f for f in detect(_make_block(text))
+            if f.entity_type == "DATE_OF_BIRTH"
+        )
+
+        self.assertEqual(text[finding.start:finding.end], "04/05/1985")
+
+    def test_dob_contract_metadata_and_offsets(self):
+        text = "Employee DOB: 1985-04-23."
+        finding = next(
+            f for f in detect(Block("doc-dob", "block-dob", text))
+            if f.entity_type == "DATE_OF_BIRTH"
+        )
+
+        self.assertEqual(text[finding.start:finding.end], "1985-04-23")
+        self.assertEqual(finding.entity_type, "DATE_OF_BIRTH")
+        self.assertEqual(finding.confidence, 0.90)
+        self.assertEqual(finding.detector, DETECTOR_ID)
+        self.assertEqual(finding.document_id, "doc-dob")
+        self.assertEqual(finding.block_id, "block-dob")
+        self.assertEqual(
+            finding.source_location,
+            f"block-dob:{finding.start}:{finding.end}",
+        )
+
+    def test_dob_after_unicode_prefix_uses_code_point_offsets(self):
+        prefix = "café — 中文 "
+        text = prefix + "Date of Birth: 23/04/1985"
+        finding = next(
+            f for f in detect(_make_block(text))
+            if f.entity_type == "DATE_OF_BIRTH"
+        )
+
+        expected = "23/04/1985"
+        self.assertEqual(finding.start, text.index(expected))
+        self.assertEqual(finding.end, finding.start + len(expected))
+        self.assertEqual(text[finding.start:finding.end], expected)
+
+
+# 8. DATE_OF_BIRTH – negative cases
+
+class TestDateOfBirthNegative(unittest.TestCase):
+
+    def test_unlabeled_ordinary_date_is_not_detected(self):
+        findings = detect(_make_block("Effective date: 1985-04-23"))
+        self.assertNotIn("DATE_OF_BIRTH", _types(findings))
+
+    def test_malformed_and_missing_dates_are_not_detected(self):
+        for text in (
+            "DOB:",
+            "DOB: 1985-02-30",
+            "Date of Birth: 31/02/1985",
+            "Birth Date: 1985-04",
+            "DOB: 04/1985",
+        ):
+            with self.subTest(text=text):
+                findings = detect(_make_block(text))
+                self.assertNotIn("DATE_OF_BIRTH", _types(findings))
+
+    def test_unrelated_labels_are_not_detected_as_dob(self):
+        findings = detect(_make_block("Review Date: 1985-04-23"))
+        self.assertNotIn("DATE_OF_BIRTH", _types(findings))
+
+
+# 9. EMPLOYEE_ID – synthetic positive cases
 
 class TestEmployeeIdPositive(unittest.TestCase):
     """Synthetic EMP-<digits> convention for test fixtures only."""
