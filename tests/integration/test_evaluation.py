@@ -1,6 +1,7 @@
 """Person 5 evaluator and gate-audit regression tests, not detector accuracy tests."""
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -169,6 +170,55 @@ class EvaluationTests(unittest.TestCase):
         encoded = json.dumps(r) + render_markdown(r)
         for value in ("TK4820913", "zoe@example.invalid", "Zoë Example", "19 Fiction Lane"):
             self.assertNotIn(value, encoded)
+
+    def test_pending_negative_blocks_are_never_scored(self):
+        for b in self.b["blocks"]:
+            b["annotation_status"] = "pending"
+        r = evaluate_bundle(self.b, include_provisional=True)
+        self.assertEqual(r["scope"]["evaluated_blocks"], 0)
+        self.assertEqual(r["scope"]["negative_blocks"], 0)
+
+    def test_reference_hash_detects_offset_drift(self):
+        block = self.b["blocks"][0]
+        block["reference_text_sha256"] = hashlib.sha256(block["text"].encode("utf-8")).hexdigest()
+        evaluate_bundle(self.b)
+        block["text"] = block["text"].replace("Zoë", "Zoe")
+        with self.assertRaises(ValidationError):
+            evaluate_bundle(self.b)
+
+    def test_malformed_nested_fields_are_controlled_validation_errors(self):
+        edits = [("documents", "format"), ("documents", "split"), ("blocks", "document_id"),
+                 ("blocks", "source_kind"), ("gold", "entity_type"), ("predictions", "block_id"),
+                 ("results", "status"), ("structure_reviews", "document_id")]
+        for collection, field in edits:
+            b = copy.deepcopy(self.b)
+            b[collection][0][field] = []
+            with self.assertRaises(ValidationError, msg=collection + "." + field):
+                evaluate_bundle(b)
+
+    def test_overlap_uses_maximum_matching(self):
+        b = copy.deepcopy(self.b)
+        block = b["blocks"][0]
+        block["text"] = "abcdefgh"
+        block["document_id"] = "syn_pdf"
+        block["block_id"] = "matching"
+        b["blocks"] = [block]
+        def finding(start, end):
+            return {"document_id": "syn_pdf", "block_id": "matching", "entity_type": "PERSON",
+                    "start": start, "end": end, "adjudication_status": "adjudicated"}
+        b["gold"] = [finding(0, 4), finding(4, 8)]
+        b["predictions"] = [finding(0, 8), finding(0, 4)]
+        b["results"] = []
+        r = evaluate_bundle(b)
+        self.assertEqual(r["exact_text"]["tp"], 1)
+        self.assertEqual(r["overlap_text_diagnostic"]["tp"], 2)
+
+    def test_leak_found_when_moved_to_another_block(self):
+        result = self.b["results"][1]
+        result["sanitized_blocks"][0]["text"] += " zoe@example.invalid"
+        m = evaluate_bundle(self.b)["release_audit"]["syn_pptx"]
+        self.assertTrue(m["unsafe_approval"])
+        self.assertEqual(m["known_residual_occurrences"], 1)
 
     def test_malformed_json_and_empty_file_return_validation_exit(self):
         with tempfile.TemporaryDirectory() as folder:

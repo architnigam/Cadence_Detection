@@ -6,6 +6,7 @@ a diagnostic, never a substitute for exact recall. No third-party dependencies.
 """
 
 from collections import Counter, defaultdict
+import hashlib
 import math
 import re
 
@@ -52,8 +53,8 @@ def _bbox(value):
 def validate_bundle(bundle):
     """Fail on ambiguous labels, wrong offsets, unknown blocks or mixed splits."""
     _require(isinstance(bundle, dict), "Bundle must be a JSON object.")
-    _require(bundle.get("schema_version") == 1, "Expected schema_version 1.")
-    _require(bundle.get("dataset_kind") in {"synthetic", "source_sample", "full_source"},
+    _require(_integer(bundle.get("schema_version")) and bundle["schema_version"] == 1, "Expected schema_version 1.")
+    _require(isinstance(bundle.get("dataset_kind"), str) and bundle["dataset_kind"] in {"synthetic", "source_sample", "full_source"},
              "Declare dataset_kind.")
     for field in ("documents", "blocks", "gold", "predictions"):
         _require(isinstance(bundle.get(field), list), "Missing required list: " + field)
@@ -62,15 +63,15 @@ def validate_bundle(bundle):
         _require(isinstance(doc, dict), "Document must be an object.")
         did = doc.get("document_id")
         _require(_identifier(did) and did not in docs, "Document IDs must be unique safe IDs.")
-        _require(doc.get("format") in {"pdf", "pptx", "docx"}, "Invalid document format.")
-        _require(doc.get("split") in {"development", "held_out"}, "Declare document split.")
+        _require(isinstance(doc.get("format"), str) and doc["format"] in {"pdf", "pptx", "docx"}, "Invalid document format.")
+        _require(isinstance(doc.get("split"), str) and doc["split"] in {"development", "held_out"}, "Declare document split.")
         _require(isinstance(doc.get("extraction_complete"), bool), "Declare extraction completeness.")
         expected = doc.get("expected_units", [])
         _require(isinstance(expected, list) and all(_identifier(x) for x in expected)
                  and len(expected) == len(set(expected)), "Invalid expected source units.")
         statuses = doc.get("unit_status", {})
         _require(isinstance(statuses, dict) and set(statuses) <= set(expected)
-                 and all(v in {"complete", "incomplete", "failed"} for v in statuses.values()),
+                 and all(isinstance(v, str) and v in {"complete", "incomplete", "failed"} for v in statuses.values()),
                  "Invalid source unit coverage.")
         if expected and doc["extraction_complete"]:
             _require(all(statuses.get(x) == "complete" for x in expected),
@@ -80,13 +81,18 @@ def validate_bundle(bundle):
     for block in bundle["blocks"]:
         _require(isinstance(block, dict), "Block must be an object.")
         key = (block.get("document_id"), block.get("block_id"))
-        _require(key[0] in docs and _identifier(key[1]) and key not in blocks,
+        _require(_identifier(key[0]) and _identifier(key[1]) and key[0] in docs and key not in blocks,
                  "Blocks must have unique keys and known documents.")
         _require(isinstance(block.get("text"), str), "Block text must be a string.")
+        if "reference_text_sha256" in block:
+            digest = block["reference_text_sha256"]
+            _require(isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest)
+                     and hashlib.sha256(block["text"].encode("utf-8")).hexdigest() == digest,
+                     "Frozen reference text hash mismatch. Re-review offsets after normalization changes.")
         _require(isinstance(block.get("image_only"), bool), "Declare image_only per block.")
-        _require(block.get("source_kind") in {"body", "table", "narrative", "image", "header", "footer", "notes", "text_box"},
+        _require(isinstance(block.get("source_kind"), str) and block["source_kind"] in {"body", "table", "narrative", "image", "header", "footer", "notes", "text_box"},
                  "Invalid block source_kind.")
-        _require(block.get("annotation_status") in {"pending", "reviewed", "adjudicated"},
+        _require(isinstance(block.get("annotation_status"), str) and block["annotation_status"] in {"pending", "reviewed", "adjudicated"},
                  "Declare annotation status, including negative blocks.")
         _require(isinstance(block.get("extraction_complete"), bool), "Declare block extraction completeness.")
         location = block.get("page_or_slide")
@@ -96,9 +102,9 @@ def validate_bundle(bundle):
         for finding in bundle[role]:
             _require(isinstance(finding, dict), "Finding must be an object.")
             key = (finding.get("document_id"), finding.get("block_id"))
-            _require(key in blocks, "Finding refers to an unknown block.")
+            _require(_identifier(key[0]) and _identifier(key[1]) and key in blocks, "Finding refers to an unknown block.")
             et = finding.get("entity_type")
-            _require(et in ENTITY_TYPES, "Finding has unknown entity_type.")
+            _require(isinstance(et, str) and et in ENTITY_TYPES, "Finding has unknown entity_type.")
             if et in VISUAL_TYPES:
                 _require(_bbox(finding.get("bbox")), "Visual findings need normalized [x0,y0,x1,y1] boxes.")
                 _require(finding.get("start") is None and finding.get("end") is None,
@@ -110,7 +116,7 @@ def validate_bundle(bundle):
                          "Finding offsets are outside the exact block text.")
                 unique = key + (et, a, b)
             if role == "gold":
-                _require(finding.get("adjudication_status") in {"pending", "reviewed", "adjudicated"},
+                _require(isinstance(finding.get("adjudication_status"), str) and finding["adjudication_status"] in {"pending", "reviewed", "adjudicated"},
                          "Gold annotation needs adjudication_status.")
                 _require(unique not in gold_keys, "Duplicate gold occurrence.")
                 gold_keys.add(unique)
@@ -189,7 +195,7 @@ def score_structure(reviews, docs, selected_ids):
     for review in reviews:
         _require(isinstance(review, dict), "Structure review must be an object.")
         did = review.get("document_id")
-        _require(did in docs and did not in by_doc, "Invalid/duplicate structure document.")
+        _require(_identifier(did) and did in docs and did not in by_doc, "Invalid/duplicate structure document.")
         dimensions = review.get("dimensions")
         _require(isinstance(dimensions, dict) and set(dimensions) == set(STRUCTURE_DIMENSIONS),
                  "Structure review must explicitly cover all five dimensions.")
@@ -248,8 +254,8 @@ def audit_results(results, docs, blocks, gold, selected_ids):
     for result in results:
         _require(isinstance(result, dict), "Result must be an object.")
         did = result.get("document_id")
-        _require(did in docs and did not in by_doc, "Unknown/duplicate result document.")
-        _require(result.get("status") in {"approved", "quarantined", "failed"}, "Invalid release status.")
+        _require(_identifier(did) and did in docs and did not in by_doc, "Unknown/duplicate result document.")
+        _require(isinstance(result.get("status"), str) and result["status"] in {"approved", "quarantined", "failed"}, "Invalid release status.")
         sanitized = result.get("sanitized_blocks")
         _require(isinstance(sanitized, list), "Result needs sanitized_blocks.")
         output_ids, output_texts = set(), []
@@ -257,7 +263,7 @@ def audit_results(results, docs, blocks, gold, selected_ids):
         for block in sanitized:
             _require(isinstance(block, dict), "Sanitized block must be an object.")
             bid = block.get("block_id")
-            _require((did, bid) in blocks and bid not in output_ids
+            _require(_identifier(bid) and (did, bid) in blocks and bid not in output_ids
                      and block.get("document_id", did) == did
                      and isinstance(block.get("text"), str), "Invalid/duplicate sanitized block.")
             output_ids.add(bid)
@@ -319,7 +325,8 @@ def evaluate_bundle(bundle, split="held_out", include_provisional=False, overlap
     selected_ids = {did for did, d in docs.items() if split == "all" or d["split"] == split}
     _require(bool(selected_ids), "No documents in selected split.")
     eligible = {key for key, b in blocks.items() if key[0] in selected_ids
-                and (include_provisional or b["annotation_status"] == "adjudicated")}
+                and (b["annotation_status"] == "adjudicated"
+                     or (include_provisional and b["annotation_status"] == "reviewed"))}
     gold = [f for f in bundle["gold"] if (f["document_id"], f["block_id"]) in eligible]
     predictions = [f for f in bundle["predictions"] if (f["document_id"], f["block_id"]) in eligible]
     gt = [f for f in gold if f["entity_type"] not in VISUAL_TYPES]

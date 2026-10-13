@@ -3,7 +3,9 @@
 ## Objective and current status
 Build a repeatable, scalable pipeline that extracts text from PDF, PPTX and DOCX evidence, detects and classifies personally identifiable information (PII), and redacts it before any downstream LLM processing. Cadence is a global financial services firm with investment banking, asset management and consumer banking operations.
 
-This repository currently contains a reviewed project scaffold, planning documents, source copies and a summary PDF. The detector, OCR pipeline, UI, measured evaluation results and final submission deck are not implemented yet. Person 1 through Person 5 are placeholders for the actual team members.
+This repository contains the reviewed project scaffold and Person 5's implemented evaluation/QA toolkit. The detector, OCR pipeline, redactor, UI, real-document measured results and submission deck remain pending. Person 1 through Person 5 are placeholders for the actual team members.
+
+**Person 5 handoff:** see [implementation and run instructions](docs/team/person5_handoff.md). Run `python -m unittest discover -s tests/integration -p "test_*.py" -v` and `python scripts/evaluate.py data/synthetic/evaluation_fixture.json --output output/reports/synthetic_example`. The synthetic report exercises the evaluator with deliberately imperfect predictions; it is not detector accuracy. Source starter labels remain local, provisional and incomplete. Presentation work is deferred at the user's request.
 
 ## What the case study requires
 - A team PowerPoint (.pptx) submission and a 10-15 minute stakeholder walkthrough.
@@ -176,5 +178,5 @@ Cadence_Detection/
 6. Each owner updates progress, evidence, open defects and slide material. Do not commit raw source files, extracted PII, identity mappings or local caches by default.
 
 ## Deliverable status
-- Completed: source review, source manifest/copies, scaffold, draft contracts/design, work allocation, summary PDF and deck outline.
-- Pending: extraction/OCR, PII recognition, redaction, demo, annotations, measured results, final PPTX and stakeholder rehearsal.
+- Completed: source review, scaffold/design/allocation and Person 5 evaluation engine, focused regressions, annotation guide, source review queue/starter, structure rubric, release audit, pipeline test inputs/runner contract, defect register and QA walkthrough.
+- Pending: extraction/OCR, PII recognition, redaction/demo, full team-adjudicated source gold, integrated checks and real measured results. PPTX work is deferred.

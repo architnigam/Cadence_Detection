@@ -12,7 +12,13 @@ data/extracted/*
 data/annotations/*
 !data/annotations/README.md
 !data/annotations/annotation_schema.json
+!data/annotations/annotation_guide.md
 output/redacted/*
 !output/redacted/README.md
 output/reports/*
 !output/reports/README.md
+!output/reports/synthetic_example.json
+!output/reports/synthetic_example.md
+!output/reports/person5_status.md
+data/synthetic/pipeline_inputs/
+*.egg-info/
