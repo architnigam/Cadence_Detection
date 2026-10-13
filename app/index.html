@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Cadence PII Redaction & Safe-Release Privacy Gate | Enterprise LLM Trust Boundary</title>
   <meta name="description" content="Enterprise-grade PII detection, redaction, and safe-release verification gate for Cadence Financial Group. Eliminates data leakage to downstream LLMs.">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0a0f1d">
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
@@ -20,7 +20,7 @@
       --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
       
-      /* Light Theme */
+      /* Light Theme Defaults */
       --bg-primary: #f8fafc;
       --bg-surface: #ffffff;
       --bg-surface-alt: #f1f5f9;
@@ -31,19 +31,19 @@
       --text-muted: #64748b;
       --accent: #2563eb;
       --accent-hover: #1d4ed8;
-      --accent-subtle: #eff6ff;
+      --accent-subtle: rgba(37, 99, 235, 0.08);
+      --destructive: #dc2626;
+      --destructive-hover: #b91c1c;
+      --destructive-subtle: rgba(220, 38, 38, 0.1);
       --success-bg: #ecfdf5;
       --success-border: #a7f3d0;
       --success-text: #065f46;
       --danger-bg: #fef2f2;
       --danger-border: #fecaca;
       --danger-text: #991b1b;
-      --warning-bg: #fffbeb;
-      --warning-border: #fde68a;
-      --warning-text: #92400e;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
     [data-theme="dark"] {
@@ -57,16 +57,16 @@
       --text-muted: #9ca3af;
       --accent: #3b82f6;
       --accent-hover: #60a5fa;
-      --accent-subtle: #1e293b;
+      --accent-subtle: rgba(59, 130, 246, 0.12);
+      --destructive: #ef4444;
+      --destructive-hover: #dc2626;
+      --destructive-subtle: rgba(239, 68, 68, 0.15);
       --success-bg: #064e3b;
       --success-border: #047857;
       --success-text: #a7f3d0;
       --danger-bg: #7f1d1d;
       --danger-border: #b91c1c;
       --danger-text: #fecaca;
-      --warning-bg: #78350f;
-      --warning-border: #b45309;
-      --warning-text: #fde68a;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
@@ -85,8 +85,233 @@
       font-family: var(--font-main);
       background-color: var(--bg-primary);
       color: var(--text-primary);
-      transition: background-color 0.25s ease, color 0.25s ease;
+      transition: background-color 0.2s ease, color 0.2s ease;
       line-height: 1.6;
+    }
+
+    /* Layout Shell */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      position: relative;
+    }
+
+    /* Collapsible Left Sidebar (Hidden by Default) */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 320px;
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 800;
+      font-size: 1.15rem;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .sidebar-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Sidebar Footer (Bottom Left: Push Button Theme + Account Settings) */
+    .sidebar-footer {
+      padding: 1.25rem;
+      border-top: 1px solid var(--border-subtle);
+      background-color: var(--bg-surface-alt);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Theme Segmented Push-Button Control */
+    .theme-segmented-control {
+      display: flex;
+      background: var(--bg-surface);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+    }
+
+    .theme-segment-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .theme-segment-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Account Settings Row */
+    .account-settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding-top: 0.5rem;
+    }
+
+    .account-info-box {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      cursor: pointer;
+    }
+
+    .account-meta {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .account-meta .name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .account-meta .role {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .settings-gear-btn {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .settings-gear-btn:hover {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    /* Main Content Wrapper */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* Top Navigation Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 68px;
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 1rem;
+    }
+
+    /* Menu Toggle Button (Button27 style) */
+    .menu-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle-btn:hover {
+      background: var(--bg-surface-alt);
     }
 
     /* Container */
@@ -94,92 +319,10 @@
       width: 100%;
       max-width: 1280px;
       margin: 0 auto;
-      padding: 0 1.25rem;
+      padding: 1.5rem;
     }
 
-    /* Navbar */
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background-color: var(--bg-surface);
-      border-bottom: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 72px;
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-      color: var(--text-primary);
-      font-weight: 800;
-      font-size: 1.25rem;
-      cursor: pointer;
-      transition: transform 0.15s ease;
-    }
-
-    .brand-logo:hover {
-      transform: scale(1.02);
-    }
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent), #1d4ed8);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-    }
-
-    .brand-badge {
-      font-size: 0.7rem;
-      font-weight: 700;
-      background-color: var(--accent-subtle);
-      color: var(--accent);
-      padding: 2px 8px;
-      border-radius: 9999px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      border: 1px solid var(--border-subtle);
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.925rem;
-      transition: color 0.2s ease;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--accent);
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    /* Breadcrumb Component (Base-UI style) */
+    /* Breadcrumbs (Breadcrumb4 style) */
     .breadcrumb-nav {
       display: flex;
       align-items: center;
@@ -192,7 +335,6 @@
       gap: 0.35rem;
       list-style: none;
       font-size: 0.85rem;
-      color: var(--text-muted);
     }
 
     .breadcrumb-item {
@@ -206,7 +348,7 @@
       text-decoration: none;
       padding: 0.15rem 0.4rem;
       border-radius: 4px;
-      transition: all 0.15s ease;
+      transition: color 0.15s ease;
     }
 
     .breadcrumb-link:hover {
@@ -225,13 +367,10 @@
 
     .breadcrumb-separator {
       color: var(--text-muted);
-      opacity: 0.6;
-      font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
+      opacity: 0.5;
     }
 
-    /* Dot Badge Component (Base-UI Badge7 style) */
+    /* Ghost Dot Badges (Badge7 style) */
     .badge-ghost {
       display: inline-flex;
       align-items: center;
@@ -243,28 +382,25 @@
       background-color: var(--bg-surface-alt);
       border: 1px solid var(--border-strong);
       color: var(--text-primary);
-      letter-spacing: 0.02em;
-      transition: all 0.2s ease;
     }
 
     .badge-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      flex-shrink: 0;
     }
 
-    .dot-primary { background-color: var(--accent); box-shadow: 0 0 6px rgba(37, 99, 235, 0.6); }
-    .dot-success { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); }
-    .dot-danger { background-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.6); animation: pulse 1.8s infinite; }
-    .dot-warning { background-color: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.6); }
+    .dot-primary { background-color: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .dot-success { background-color: #10b981; box-shadow: 0 0 6px #10b981; }
+    .dot-danger { background-color: #ef4444; box-shadow: 0 0 6px #ef4444; animation: pulse 1.8s infinite; }
+    .dot-warning { background-color: #f59e0b; }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.5; transform: scale(0.85); }
     }
 
-    /* Avatar Component (Base-UI Avatar2 style) */
+    /* Avatar2 Component */
     .avatar-wrapper {
       position: relative;
       display: inline-flex;
@@ -277,12 +413,6 @@
       outline: 2px solid var(--accent);
       outline-offset: 2px;
       background-color: var(--bg-surface-alt);
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .avatar-wrapper:hover {
-      transform: scale(1.05);
     }
 
     .avatar-img {
@@ -303,257 +433,160 @@
       height: 100%;
     }
 
-    .user-profile-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      padding: 0.25rem 0.5rem 0.25rem 0.25rem;
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-subtle);
-      border-radius: 9999px;
-    }
-
-    .user-profile-info {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-      padding-right: 0.4rem;
-    }
-
-    .user-profile-name {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .user-profile-role {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-    }
-
-    .theme-toggle-btn {
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1.1rem;
-      transition: all 0.2s ease;
-    }
-
-    .theme-toggle-btn:hover {
-      background: var(--border-subtle);
-    }
-
-    .mobile-menu-btn {
-      display: none;
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    /* Mobile Drawer */
-    .mobile-menu {
-      display: none;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1.25rem;
-      background-color: var(--bg-surface);
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .mobile-menu.open {
-      display: flex;
-    }
-
-    .mobile-menu a {
-      text-decoration: none;
-      color: var(--text-primary);
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    /* Hero / Header Section */
+    /* Hero Section */
     .hero-section {
-      padding: 2.5rem 0 1.5rem 0;
+      padding: 1.5rem 0;
       border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--accent);
-      background-color: var(--accent-subtle);
-      padding: 4px 12px;
-      border-radius: 9999px;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1.5rem;
     }
 
     .hero-title {
-      font-size: 2.25rem;
+      font-size: 2.15rem;
       font-weight: 800;
       letter-spacing: -0.025em;
-      margin-bottom: 0.75rem;
-      color: var(--text-primary);
+      margin: 0.5rem 0;
     }
 
     .hero-subtitle {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       color: var(--text-secondary);
-      max-width: 800px;
-      margin-bottom: 1.5rem;
+      max-width: 850px;
+      margin-bottom: 1.25rem;
     }
 
     .incident-bar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.25rem;
       background-color: var(--bg-surface);
-      padding: 1rem 1.25rem;
-      border-radius: 10px;
+      padding: 0.85rem 1.25rem;
+      border-radius: 8px;
       border: 1px solid var(--border-subtle);
-      font-size: 0.9rem;
+      font-size: 0.885rem;
     }
 
     .incident-bar a {
       color: var(--accent);
       font-weight: 600;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
     }
 
-    .incident-bar a:hover {
-      text-decoration: underline;
-    }
-
-    /* Main Dashboard Layout */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      gap: 1.5rem;
-      padding: 2rem 0;
-    }
-
-    /* Control Panel */
-    .control-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
-      height: fit-content;
-    }
-
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 1.25rem;
+    /* Ingestion Toolbar with ButtonGroup1 */
+    .toolbar-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg-surface);
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ButtonGroup1: Split Upload Button Group */
+    .split-btn-group {
+      display: inline-flex;
+      border-radius: 6px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .split-btn-action {
+      display: inline-flex;
+      align-items: center;
       gap: 0.5rem;
+      padding: 0.55rem 0.95rem;
+      background-color: var(--bg-surface-alt);
+      border: 1px solid var(--border-strong);
+      border-right: none;
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
     }
 
-    .form-group {
-      margin-bottom: 1.25rem;
+    .split-btn-action:hover {
+      background-color: var(--border-subtle);
     }
 
-    .form-label {
-      display: block;
+    .split-btn-counter {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.55rem 0.85rem;
+      background-color: rgba(148, 163, 184, 0.1);
+      border: 1px solid var(--border-strong);
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Slider Component (Themed) */
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .slider-label {
       font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-secondary);
-      margin-bottom: 0.5rem;
+      white-space: nowrap;
     }
 
-    .form-select, .form-input {
-      width: 100%;
-      padding: 0.65rem 0.85rem;
-      background-color: var(--bg-surface-alt);
-      border: 1px solid var(--border-strong);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 0.9rem;
+    .theme-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 140px;
+      height: 6px;
+      background: var(--border-strong);
+      border-radius: 9999px;
       outline: none;
-      transition: border-color 0.2s ease;
+      transition: background 0.2s;
     }
 
-    .form-select:focus, .form-input:focus {
-      border-color: var(--accent);
+    .theme-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 6px var(--accent);
     }
 
-    .btn {
+    /* Navigation Buttons (Button2: Prev/Next) */
+    .nav-btn-group {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.925rem;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-      text-decoration: none;
+      gap: 0.65rem;
     }
 
-    .btn-primary {
-      background-color: var(--accent);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--accent-hover);
-    }
-
-    .btn-outline {
-      background-color: transparent;
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
+      background: transparent;
       border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
       color: var(--text-primary);
-      margin-top: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .btn-outline:hover {
-      background-color: var(--bg-surface-alt);
-    }
-
-    .btn-danger {
-      background-color: var(--danger-bg);
-      border: 1px solid var(--danger-border);
-      color: var(--danger-text);
-      margin-top: 0.5rem;
-    }
-
-    .btn-danger:hover {
-      background-color: #fee2e2;
-    }
-
-    /* Results Panel */
-    .results-area {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      min-width: 0; /* Prevents flex children from causing horizontal scroll */
+    .btn-nav:hover {
+      background: var(--bg-surface-alt);
     }
 
     /* Gate Status Banner */
@@ -564,13 +597,8 @@
       padding: 1.25rem 1.5rem;
       border-radius: 12px;
       border: 1px solid transparent;
+      margin-bottom: 1.5rem;
       box-shadow: var(--shadow-sm);
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .gate-status-banner.approved {
@@ -585,41 +613,12 @@
       color: var(--danger-text);
     }
 
-    .status-badge {
-      font-size: 0.85rem;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-badge.approved {
-      background-color: #059669;
-      color: #ffffff;
-    }
-
-    .status-badge.quarantined {
-      background-color: #dc2626;
-      color: #ffffff;
-    }
-
-    .status-content h3 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .status-content p {
-      font-size: 0.9rem;
-      opacity: 0.95;
-    }
-
     /* Metrics Grid */
     .metrics-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .metric-box {
@@ -627,7 +626,6 @@
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
       padding: 1.25rem;
-      box-shadow: var(--shadow-sm);
     }
 
     .metric-label {
@@ -636,13 +634,12 @@
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
     }
 
     .metric-value {
-      font-size: 1.75rem;
+      font-size: 1.85rem;
       font-weight: 800;
-      color: var(--text-primary);
+      margin-top: 0.35rem;
     }
 
     /* Comparison Area */
@@ -650,6 +647,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.25rem;
+      margin-bottom: 1.5rem;
     }
 
     .code-panel {
@@ -657,7 +655,6 @@
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
     }
@@ -671,31 +668,6 @@
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .panel-header h4 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .copy-btn {
-      background: transparent;
-      border: 1px solid var(--border-strong);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .copy-btn:hover {
-      background: var(--bg-surface);
-      color: var(--text-primary);
-    }
-
     .code-content {
       padding: 1.25rem;
       font-family: var(--font-mono);
@@ -703,23 +675,63 @@
       line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
-      overflow-x: hidden; /* No horizontal scroll */
+      overflow-x: hidden;
       max-height: 480px;
       overflow-y: auto;
+    }
+
+    /* Button14: Download Button (Dashed border, primary/10 background) */
+    .btn-download-dashed {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      border: 1.5px dashed var(--accent);
+      background-color: var(--accent-subtle);
       color: var(--text-primary);
-      flex: 1;
-    }
-
-    .highlight-token {
-      background-color: rgba(37, 99, 235, 0.15);
-      color: var(--accent);
-      padding: 2px 6px;
-      border-radius: 4px;
       font-weight: 600;
-      border: 1px solid rgba(37, 99, 235, 0.3);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
 
-    /* Toast Notification */
+    .btn-download-dashed:hover {
+      background-color: rgba(37, 99, 235, 0.18);
+    }
+
+    /* Button35: Delete Button (Gradient destructive) */
+    .btn-delete-gradient {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #991b1b 100%);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-delete-gradient:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    /* Action bar */
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Toast Container */
     .toast-container {
       position: fixed;
       bottom: 24px;
@@ -728,7 +740,6 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      max-width: 90vw;
     }
 
     .toast {
@@ -741,8 +752,7 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      color: var(--text-primary);
-      animation: slideUp 0.3s ease forwards;
+      animation: slideUp 0.3s ease;
     }
 
     @keyframes slideUp {
@@ -750,339 +760,256 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    .toast-success {
-      border-left: 4px solid #059669;
-    }
-
-    .toast-error {
-      border-left: 4px solid #dc2626;
-    }
-
-    /* 404 Modal / View */
-    .custom-404-view {
-      display: none;
-      padding: 4rem 1.5rem;
-      text-align: center;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      margin: 2rem 0;
-    }
-
-    .custom-404-view.active {
-      display: block;
-    }
-
-    .error-code {
-      font-size: 5rem;
-      font-weight: 900;
-      color: var(--accent);
-      line-height: 1;
-      margin-bottom: 1rem;
-    }
+    .toast-success { border-left: 4px solid #10b981; }
+    .toast-error { border-left: 4px solid #ef4444; }
 
     /* Footer */
     .footer {
-      background-color: var(--bg-surface);
       border-top: 1px solid var(--border-subtle);
-      padding: 3rem 0 2rem 0;
+      padding: 2.5rem 0 1.5rem 0;
       margin-top: 3rem;
-    }
-
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .footer-col h5 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--text-primary);
-    }
-
-    .footer-links {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-
-    .footer-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.875rem;
-      transition: color 0.2s ease;
-    }
-
-    .footer-links a:hover {
-      color: var(--accent);
-    }
-
-    .footer-bottom {
-      border-top: 1px solid var(--border-subtle);
-      padding-top: 1.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
       font-size: 0.85rem;
       color: var(--text-muted);
     }
 
-    /* Responsive Queries */
-    @media (max-width: 992px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-      .comparison-grid {
-        grid-template-columns: 1fr;
-      }
-      .footer-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .nav-links {
-        display: none;
-      }
-      .mobile-menu-btn {
-        display: flex;
-      }
-      .hero-title {
-        font-size: 1.75rem;
-      }
-      .footer-grid {
-        grid-template-columns: 1fr;
-      }
-      .metrics-row {
-        grid-template-columns: 1fr 1fr;
-      }
+    @media (max-width: 868px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+      .toolbar-row { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body data-theme="dark">
 
-  <!-- Navigation Bar -->
-  <header class="navbar">
-    <div class="container nav-inner">
-      <a href="#home" class="brand-logo" id="brandLogoBtn" title="Cadence Privacy Gate Dashboard">
-        <div class="brand-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-          </svg>
-        </div>
-        <span>Cadence Guard</span>
-        <span class="brand-badge">PII GATE</span>
-      </a>
+  <div class="app-shell">
+    
+    <!-- Sidebar Overlay (closes when clicked outside) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
 
-      <!-- Desktop Links -->
-      <nav>
-        <ul class="nav-links">
-          <li><a href="#demo" class="active" id="navDemoLink">Live Redaction Demo</a></li>
-          <li><a href="#policy" id="navPolicyLink">Risk Policy v6.0</a></li>
-          <li><a href="#raci" id="navRaciLink">Org Directory</a></li>
-          <li><a href="#404" id="nav404Link">404 Route Test</a></li>
-        </ul>
-      </nav>
-
-      <!-- Actions with Avatar2 and Theme Toggle -->
-      <div class="nav-actions">
-        <!-- Avatar2 Profile Component -->
-        <div class="user-profile-badge" title="Alex Rivera · Data Protection Officer">
-          <div class="avatar-wrapper">
-            <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera" class="avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <span class="avatar-fallback" style="display: none;">AR</span>
-          </div>
-          <div class="user-profile-info">
-            <span class="user-profile-name">Alex Rivera</span>
-            <span class="user-profile-role">DPO Officer</span>
-          </div>
-        </div>
-
-        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
-          <span id="themeIcon">☀️</span>
-        </button>
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation Menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
+    <!-- Collapsible Left Sidebar (Hidden by default) -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="#home" class="sidebar-brand">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--accent)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          <span>Cadence Guard</span>
+        </a>
+        <button class="menu-toggle-btn" onclick="toggleSidebar(false)" aria-label="Close Sidebar" style="width: 32px; height: 32px;">
+          ✕
         </button>
       </div>
-    </div>
 
-    <!-- Responsive Mobile Menu Drawer -->
-    <div class="mobile-menu" id="mobileMenuDrawer">
-      <div style="display: flex; align-items: center; gap: 10px; padding: 0.5rem 0; border-bottom: 1px solid var(--border-subtle);">
-        <div class="avatar-wrapper" style="width: 32px; height: 32px;">
-          <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera" class="avatar-img">
-        </div>
+      <div class="sidebar-content">
         <div>
-          <div style="font-size: 0.85rem; font-weight: 700;">Alex Rivera</div>
-          <div style="font-size: 0.7rem; color: var(--text-muted);">Data Protection Officer</div>
+          <div class="sidebar-section-title">Navigation Partition</div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="btn-nav" style="width: 100%; justify-content: flex-start;" onclick="loadSample('org_pack'); toggleSidebar(false);">
+              📄 Org Pack (PPTX)
+            </button>
+            <button class="btn-nav" style="width: 100%; justify-content: flex-start;" onclick="loadSample('risk_policy'); toggleSidebar(false);">
+              🛡️ Risk Policy v6.0 (PDF)
+            </button>
+            <button class="btn-nav" style="width: 100%; justify-content: flex-start;" onclick="loadSample('tprm'); toggleSidebar(false);">
+              📋 TPRM Training (DOCX)
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sidebar-section-title">Stress Simulation</div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="btn-nav" style="width: 100%; justify-content: flex-start; color: #ef4444;" onclick="simulateLeakage(); toggleSidebar(false);">
+              ⚠️ Trigger PII Leak (Quarantine)
+            </button>
+            <button class="btn-nav" style="width: 100%; justify-content: flex-start; color: #f59e0b;" onclick="simulateOcrFailure(); toggleSidebar(false);">
+              🛑 Trigger OCR Incomplete
+            </button>
+          </div>
         </div>
       </div>
-      <a href="#demo" class="mobile-link" onclick="closeMobileMenu()">Live Redaction Demo</a>
-      <a href="#policy" class="mobile-link" onclick="closeMobileMenu()">Risk Policy v6.0</a>
-      <a href="#raci" class="mobile-link" onclick="closeMobileMenu()">Org Directory & RACI</a>
-      <a href="#404" class="mobile-link" onclick="closeMobileMenu()">Custom 404 Page</a>
-      <a href="mailto:dpo@cadence.com">Contact DPO (dpo@cadence.com)</a>
-      <a href="tel:+15550188">Incident Hotline (+1 555 0188)</a>
-    </div>
-  </header>
 
-  <!-- Main Container -->
-  <main class="container" id="mainContent">
+      <!-- Bottom Left Sidebar Footer: Push Button Theme + Account Settings -->
+      <div class="sidebar-footer">
+        
+        <!-- Push-Button Segmented Theme Control (Above Account Settings) -->
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase;">
+            Appearance
+          </div>
+          <div class="theme-segmented-control">
+            <button type="button" class="theme-segment-btn" id="themeSegmentLight" onclick="setAppTheme('light')">
+              ☀️ Light
+            </button>
+            <button type="button" class="theme-segment-btn active" id="themeSegmentDark" onclick="setAppTheme('dark')">
+              🌙 Dark
+            </button>
+          </div>
+        </div>
 
-    <!-- Hero Header -->
-    <section class="hero-section" id="home">
+        <!-- Account Settings Section -->
+        <div class="account-settings-row">
+          <div class="account-info-box" title="Alex Rivera · DPO Clearance Level 3">
+            <div class="avatar-wrapper" style="width: 34px; height: 34px;">
+              <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera" class="avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <span class="avatar-fallback" style="display: none;">AR</span>
+            </div>
+            <div class="account-meta">
+              <span class="name">Alex Rivera</span>
+              <span class="role">DPO · Account Settings</span>
+            </div>
+          </div>
+          <button class="settings-gear-btn" onclick="showToast('Account Settings: Clearance Tier 1 Active', 'success')" title="Account Settings">
+            ⚙️
+          </button>
+        </div>
 
-      <!-- Breadcrumb4 Component with Dot Separators -->
-      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-        <ol class="breadcrumb-list">
-          <li class="breadcrumb-item">
-            <a href="#home" class="breadcrumb-link" onclick="returnToDashboard()">Library</a>
-            <span class="breadcrumb-separator" aria-hidden="true">•</span>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="#demo" class="breadcrumb-link" onclick="returnToDashboard()">Resources</a>
-            <span class="breadcrumb-separator" aria-hidden="true">•</span>
-          </li>
-          <li class="breadcrumb-item">
-            <span class="breadcrumb-page" aria-current="page">Design Notes</span>
-          </li>
-        </ol>
-      </nav>
-
-      <!-- Badge7 Ghost Dot Badges (dynamic color by use case) -->
-      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-        <span class="badge-ghost" title="Trust boundary enforced">
-          <span class="badge-dot dot-primary" aria-hidden="true"></span>
-          Enterprise Trust Boundary
-        </span>
-        <span class="badge-ghost" title="Local air gap active">
-          <span class="badge-dot dot-success" aria-hidden="true"></span>
-          Air-Gapped Local Storage
-        </span>
-        <span class="badge-ghost" title="Case study 2">
-          <span class="badge-dot dot-warning" aria-hidden="true"></span>
-          Case Study 2
-        </span>
       </div>
+    </aside>
 
-      <h1 class="hero-title">Cadence PII Redaction & Safe-Release Privacy Gate</h1>
-      <p class="hero-subtitle">
-        Automated text extraction, local PII classification, and overlap-safe redaction. Enforces an impenetrable verification gate before unredacted text can reach any downstream Large Language Model.
-      </p>
-
-      <!-- Incident & Contact Bar (Clickable Phone & Email) -->
-      <div class="incident-bar">
-        <span><strong>Accountable Officer:</strong> Alex Rivera (DPO)</span>
-        <span>·</span>
-        <span><strong>Security Contact:</strong> <a href="mailto:dpo@cadence.com" id="clickableEmailLink">✉️ dpo@cadence.com</a></span>
-        <span>·</span>
-        <span><strong>Incident Hotline:</strong> <a href="tel:+15550188" id="clickablePhoneLink">📞 +1 (555) 0188</a></span>
-      </div>
-    </section>
-
-    <!-- Custom 404 View (Hidden by default, triggered by #404) -->
-    <section class="custom-404-view" id="view404">
-      <div class="error-code">404</div>
-      <h2>Requested Document or Route Not Found</h2>
-      <p style="color: var(--text-secondary); max-width: 500px; margin: 1rem auto 2rem auto;">
-        The requested evidence partition does not exist inside Cadence's secure vault boundary or the route was invalidated.
-      </p>
-      <button class="btn btn-primary" style="width: auto; padding: 0.75rem 2rem; margin: 0 auto;" onclick="returnToDashboard()">
-        Return to Live Redaction Dashboard
-      </button>
-    </section>
-
-    <!-- Dashboard Content -->
-    <div class="dashboard-grid" id="dashboardView">
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
       
-      <!-- Left Sidebar: Controls -->
-      <aside class="control-card">
-        <h2 class="card-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
-          Document Selection
-        </h2>
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <!-- Button27: Menu Toggle Button (FiMenu / FiX) -->
+            <button class="menu-toggle-btn" id="sidebarMenuBtn" onclick="toggleSidebar()" aria-label="Toggle Navigation Sidebar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="menuIcon">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <span style="font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>🛡️ Cadence Guard</span>
+              <span class="badge-ghost" style="font-size: 0.7rem; padding: 2px 8px;">
+                <span class="badge-dot dot-primary"></span>
+                AIR GAP ACTIVE
+              </span>
+            </span>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label" for="docSelector">Select Cadence Evidence:</label>
-          <select class="form-select" id="docSelector">
-            <option value="org_pack">Cadence Org Pack (PPTX · Slides & RACI)</option>
-            <option value="risk_policy">Cadence Risk Policy v6.0 (PDF OCR · Sec 16.5)</option>
-            <option value="tprm">Cadence TPRM Training (DOCX · Table 5)</option>
-          </select>
+          <!-- Top Right Officer Profile Badge -->
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="avatar-wrapper" style="width: 36px; height: 36px;" title="Alex Rivera · Data Protection Officer">
+              <img src="https://assets.watermelon.sh/wm_alex.png" alt="Alex Rivera" class="avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <span class="avatar-fallback" style="display: none;">AR</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Container Body -->
+      <main class="container">
+        
+        <!-- Breadcrumb4 Component with Dot Separators -->
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+          <ol class="breadcrumb-list">
+            <li class="breadcrumb-item">
+              <a href="#home" class="breadcrumb-link" onclick="loadSample('org_pack')">Library</a>
+              <span class="breadcrumb-separator">•</span>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="#resources" class="breadcrumb-link" onclick="loadSample('risk_policy')">Resources</a>
+              <span class="breadcrumb-separator">•</span>
+            </li>
+            <li class="breadcrumb-item">
+              <span class="breadcrumb-page">Design Notes</span>
+            </li>
+          </ol>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-section" id="home">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+            <span class="badge-ghost">
+              <span class="badge-dot dot-primary"></span>
+              Enterprise Trust Boundary
+            </span>
+            <span class="badge-ghost">
+              <span class="badge-dot dot-success"></span>
+              Air-Gapped Local Storage
+            </span>
+            <span class="badge-ghost">
+              <span class="badge-dot dot-warning"></span>
+              Case Study 2
+            </span>
+          </div>
+
+          <h1 class="hero-title">Cadence PII Redaction & Safe-Release Privacy Gate</h1>
+          <p class="hero-subtitle">
+            Automated text extraction, local PII classification, and overlap-safe redaction. Enforces an impenetrable verification gate before unredacted text can reach any downstream Large Language Model.
+          </p>
+
+          <div class="incident-bar">
+            <span><strong>Accountable Officer:</strong> Alex Rivera (DPO)</span>
+            <span>·</span>
+            <span><strong>Security Contact:</strong> <a href="mailto:dpo@cadence.com">✉️ dpo@cadence.com</a></span>
+            <span>·</span>
+            <span><strong>Incident Hotline:</strong> <a href="tel:+15550188">📞 +1 (555) 0188</a></span>
+          </div>
+        </section>
+
+        <!-- Ingestion Toolbar (ButtonGroup1 + Slider + Button2 Prev/Next) -->
+        <div class="toolbar-row">
+          
+          <!-- ButtonGroup1: Upload with Count Badge -->
+          <div class="split-btn-group">
+            <button class="split-btn-action" onclick="showToast('Upload triggered: 3 Cadence evidence files ready.', 'success')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Upload
+            </button>
+            <span class="split-btn-counter" id="fileCountBadge">3 files</span>
+          </div>
+
+          <!-- Themed Slider Component -->
+          <div class="slider-box">
+            <label class="slider-label" for="ocrConfidenceSlider">OCR Quality Threshold: <strong id="sliderVal">75%</strong></label>
+            <input type="range" min="50" max="95" value="75" class="theme-slider" id="ocrConfidenceSlider" oninput="updateSliderVal(this.value)">
+          </div>
+
+          <!-- Button2: Navigation Prev / Next Buttons -->
+          <div class="nav-btn-group">
+            <button class="btn-nav" id="btnPrevDoc" onclick="navigateDoc(-1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Prev
+            </button>
+            <button class="btn-nav" id="btnNextDoc" onclick="navigateDoc(1)">
+              Next
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="tokenStyle">Placeholder Style:</label>
-          <select class="form-select" id="tokenStyle">
-            <option value="bracketed">[TYPE_INDEX] (e.g. [PERSON_1])</option>
-            <option value="chevrons">&lt;TYPE_INDEX&gt; (e.g. &lt;EMAIL_1&gt;)</option>
-            <option value="redacted">REDACTED_TYPE (e.g. REDACTED_PHONE)</option>
-          </select>
-        </div>
-
-        <button class="btn btn-primary" id="runPipelineBtn">
-          ⚡ Run Redaction & Gate
-        </button>
-
-        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 1.5rem 0 0.5rem 0;">
-          Fail-Safe Stress Simulations
-        </h3>
-
-        <button class="btn btn-danger" id="simulateLeakBtn" title="Test Gate Quarantine when PII escapes detector">
-          ⚠️ Simulate Leakage (Quarantine)
-        </button>
-
-        <button class="btn btn-outline" id="simulateOcrFailureBtn" title="Test Gate Quarantine on incomplete OCR">
-          🛑 Simulate Incomplete Extraction
-        </button>
-
-        <button class="btn btn-outline" id="resetPipelineBtn" style="margin-top: 1rem;">
-          🔄 Reset to Clean State
-        </button>
-      </aside>
-
-      <!-- Right Main: Results & Comparison -->
-      <section class="results-area">
-
-        <!-- Gate Status Alert Banner with Badge7 Dot Badge -->
+        <!-- Gate Status Alert Banner with Badge7 Dot -->
         <div class="gate-status-banner approved" id="gateBanner">
           <span class="badge-ghost" id="gateBadge" style="background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);">
             <span class="badge-dot dot-success" id="gateDot" aria-hidden="true"></span>
             <span id="gateBadgeText">APPROVED</span>
           </span>
-          <div class="status-content">
-            <h3 id="gateTitle">SAFE FOR DOWNSTREAM LLM INGESTION</h3>
-            <p id="gateMessage">Zero residual PII detected post-redaction. Document structure and relational context verified.</p>
+          <div>
+            <h3 id="gateTitle" style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">SAFE FOR DOWNSTREAM LLM INGESTION</h3>
+            <p id="gateMessage" style="font-size: 0.9rem;">Zero residual PII detected post-redaction. Document structure and relational context verified.</p>
           </div>
         </div>
 
-        <!-- Metric Cards -->
+        <!-- Metrics Grid -->
         <div class="metrics-row">
           <div class="metric-box">
-            <div class="metric-label">Document Type</div>
+            <div class="metric-label">Document Partition</div>
             <div class="metric-value" id="metricDocType">PPTX</div>
           </div>
           <div class="metric-box">
             <div class="metric-label">PII Entities Masked</div>
-            <div class="metric-value" id="metricPiiCount">5</div>
+            <div class="metric-value" id="metricPiiCount">7</div>
           </div>
           <div class="metric-box">
-            <div class="metric-label">Structure Retained</div>
-            <div class="metric-value" style="color: #059669;" id="metricStructure">98%</div>
+            <div class="metric-label">Structure Retention</div>
+            <div class="metric-value" style="color: #10b981;" id="metricStructure">99%</div>
           </div>
           <div class="metric-box">
             <div class="metric-label">Residual Leaks</div>
@@ -1090,14 +1017,13 @@
           </div>
         </div>
 
-        <!-- Side-by-Side Comparison -->
+        <!-- Comparison Area -->
         <div class="comparison-grid">
           
-          <!-- Original Panel -->
           <div class="code-panel">
             <div class="panel-header">
-              <h4>📄 Original Evidence Text</h4>
-              <button class="copy-btn" onclick="copyText('originalTextContent', 'Original Text')">Copy</button>
+              <h4 style="font-size: 0.95rem; font-weight: 700;">📄 Original Evidence Text</h4>
+              <button class="btn-nav" style="padding: 2px 8px; font-size: 0.75rem;" onclick="copyText('originalTextContent', 'Original Text')">Copy</button>
             </div>
             <div class="code-content" id="originalTextContent">
 Chief Risk Officer: Marcus Vance (marcus.vance@cadence.com, +1 (555) 0114).
@@ -1111,11 +1037,10 @@ Incident RACI Matrix:
             </div>
           </div>
 
-          <!-- Sanitized Panel -->
           <div class="code-panel">
             <div class="panel-header">
-              <h4>🔒 Sanitized Text (Safe for LLM)</h4>
-              <button class="copy-btn" onclick="copyText('sanitizedTextContent', 'Sanitized Text')">Copy</button>
+              <h4 style="font-size: 0.95rem; font-weight: 700;">🔒 Sanitized Text (Safe for LLM)</h4>
+              <button class="btn-nav" style="padding: 2px 8px; font-size: 0.75rem;" onclick="copyText('sanitizedTextContent', 'Sanitized Text')">Copy</button>
             </div>
             <div class="code-content" id="sanitizedTextContent">
 Chief Risk Officer: [PERSON_1] ([EMAIL_1], [PHONE_1]).
@@ -1131,100 +1056,60 @@ Incident RACI Matrix:
 
         </div>
 
-        <!-- Action Export Bar -->
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <button class="btn btn-primary" id="downloadSanitizedBtn" style="width: auto; padding: 0.75rem 1.75rem;" onclick="downloadSanitizedFile()">
-            📥 Download Sanitized Text (.txt)
+        <!-- Action Bar: Button14 (Download Dashed) + Button35 (Delete Gradient) -->
+        <div class="action-bar">
+          
+          <!-- Button14: Download Dashed Border Button -->
+          <button class="btn-download-dashed" id="downloadSanitizedBtn" onclick="downloadSanitizedFile()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download
           </button>
-          <button class="btn btn-outline" style="width: auto;" onclick="showToast('Token mapping securely retained in local memory.', 'success')">
+
+          <!-- Button35: Delete Gradient Button -->
+          <button class="btn-delete-gradient" onclick="purgeMemoryCache()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Delete
+          </button>
+
+          <button class="btn-nav" onclick="showToast('Token mapping securely verified in memory.', 'success')">
             🔑 View Stable Token Registry
           </button>
+
         </div>
 
-      </section>
-
-    </div>
-
-  </main>
-
-  <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-col">
-          <div class="brand-logo" style="margin-bottom: 0.75rem;">
-            <div class="brand-icon" style="width: 28px; height: 28px;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-              </svg>
+        <!-- Footer -->
+        <footer class="footer">
+          <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div>© 2026 Cadence Financial Group · All rights reserved.</div>
+            <div>
+              <a href="mailto:dpo@cadence.com" style="color: var(--accent); text-decoration: none;">Contact DPO</a> · 
+              <a href="tel:+15550188" style="color: var(--accent); text-decoration: none;">Incident Hotline</a>
             </div>
-            <span>Cadence Financial Group</span>
           </div>
-          <p style="color: var(--text-secondary); font-size: 0.875rem; max-width: 440px;">
-            Enterprise AI trust boundary engineered to prevent unauthorized leakage of Personally Identifiable Information into Large Language Models.
-          </p>
-        </div>
+        </footer>
 
-        <div class="footer-col">
-          <h5>Privacy & Architecture</h5>
-          <ul class="footer-links">
-            <li><a href="#demo" onclick="returnToDashboard()">Safe-Release Gate</a></li>
-            <li><a href="#policy" onclick="loadSample('risk_policy')">Risk Policy v6.0 OCR</a></li>
-            <li><a href="#raci" onclick="loadSample('org_pack')">RACI Entity Mapping</a></li>
-            <li><a href="#404" onclick="trigger404View()">Custom 404 Route</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h5>Security Direct</h5>
-          <ul class="footer-links">
-            <li><a href="mailto:dpo@cadence.com">✉️ dpo@cadence.com</a></li>
-            <li><a href="tel:+15550188">📞 +1 (555) 0188</a></li>
-            <li><a href="mailto:security@cadence.com">✉️ security@cadence.com</a></li>
-            <li><a href="#demo">Wall Street, New York, NY</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <div>
-          © <span id="copyrightYear">2026</span> Cadence Financial Group. All rights reserved.
-        </div>
-        <div>
-          Confidential · Internal Risk Management Case Study 2
-        </div>
-      </div>
+      </main>
     </div>
-  </footer>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <!-- Application Logic -->
   <script>
-    // Dynamic Copyright Year
-    document.getElementById('copyrightYear').textContent = new Date().getFullYear();
-
-    // Data Repositories for Cadence Documents
     const SAMPLES = {
       org_pack: {
         docType: "PPTX",
-        original: `Chief Risk Officer: Marcus Vance (marcus.vance@cadence.com, +1 (555) 0114).
-Office Location: 45 Wall St, New York.
-Data Protection Officer: Elena Rostova (elena.rostova@cadence.com, +1 (555) 0188).
-Accountability: PII Classification, OCR Governance, and Downstream Gate.
-
-Incident RACI Matrix:
-- DPO Accountable: Elena Rostova
-- Lead Investigator Responsible: Marcus Vance`,
-        sanitized: `Chief Risk Officer: [PERSON_1] ([EMAIL_1], [PHONE_1]).
-Office Location: [HOME_ADDRESS_1].
-Data Protection Officer: [PERSON_2] ([EMAIL_2], [PHONE_2]).
-Accountability: PII Classification, OCR Governance, and Downstream Gate.
-
-Incident RACI Matrix:
-- DPO Accountable: [PERSON_2]
-- Lead Investigator Responsible: [PERSON_1]`,
+        original: `Chief Risk Officer: Marcus Vance (marcus.vance@cadence.com, +1 (555) 0114).\nOffice Location: 45 Wall St, New York.\nData Protection Officer: Elena Rostova (elena.rostova@cadence.com, +1 (555) 0188).\nAccountability: PII Classification, OCR Governance, and Downstream Gate.\n\nIncident RACI Matrix:\n- DPO Accountable: Elena Rostova\n- Lead Investigator Responsible: Marcus Vance`,
+        sanitized: `Chief Risk Officer: [PERSON_1] ([EMAIL_1], [PHONE_1]).\nOffice Location: [HOME_ADDRESS_1].\nData Protection Officer: [PERSON_2] ([EMAIL_2], [PHONE_2]).\nAccountability: PII Classification, OCR Governance, and Downstream Gate.\n\nIncident RACI Matrix:\n- DPO Accountable: [PERSON_2]\n- Lead Investigator Responsible: [PERSON_1]`,
         piiCount: 7,
         structure: "99%",
         leaks: 0,
@@ -1234,14 +1119,8 @@ Incident RACI Matrix:
       },
       risk_policy: {
         docType: "PDF OCR",
-        original: `Cadence Risk Management Policy v6.0 - Section 16.5 Incident Log:
-Analyst David Cho (EMP-49821) escalated an unencrypted data export containing customer account ACC-910283.
-Primary Contact: David Cho (david.cho@cadence.com).
-Escalation Status: Resolved under RACI protocol.`,
-        sanitized: `Cadence Risk Management Policy v6.0 - Section 16.5 Incident Log:
-Analyst [PERSON_1] ([EMPLOYEE_ID_1]) escalated an unencrypted data export containing customer account [BANK_ACCOUNT_1].
-Primary Contact: [PERSON_1] ([EMAIL_1]).
-Escalation Status: Resolved under RACI protocol.`,
+        original: `Cadence Risk Management Policy v6.0 - Section 16.5 Incident Log:\nAnalyst David Cho (EMP-49821) escalated an unencrypted data export containing customer account ACC-910283.\nPrimary Contact: David Cho (david.cho@cadence.com).\nEscalation Status: Resolved under RACI protocol.`,
+        sanitized: `Cadence Risk Management Policy v6.0 - Section 16.5 Incident Log:\nAnalyst [PERSON_1] ([EMPLOYEE_ID_1]) escalated an unencrypted data export containing customer account [BANK_ACCOUNT_1].\nPrimary Contact: [PERSON_1] ([EMAIL_1]).\nEscalation Status: Resolved under RACI protocol.`,
         piiCount: 4,
         structure: "96%",
         leaks: 0,
@@ -1251,12 +1130,8 @@ Escalation Status: Resolved under RACI protocol.`,
       },
       tprm: {
         docType: "DOCX",
-        original: `Third-Party Risk Management (TPRM) Training - Table 5 Users:
-Vendor Auditor: Sarah Jenkins (sarah.jenkins@onrust-audit.com, +1 (555) 0142).
-Assigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
-        sanitized: `Third-Party Risk Management (TPRM) Training - Table 5 Users:
-Vendor Auditor: [PERSON_1] ([EMAIL_1], [PHONE_1]).
-Assigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
+        original: `Third-Party Risk Management (TPRM) Training - Table 5 Users:\nVendor Auditor: Sarah Jenkins (sarah.jenkins@onrust-audit.com, +1 (555) 0142).\nAssigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
+        sanitized: `Third-Party Risk Management (TPRM) Training - Table 5 Users:\nVendor Auditor: [PERSON_1] ([EMAIL_1], [PHONE_1]).\nAssigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
         piiCount: 3,
         structure: "100%",
         leaks: 0,
@@ -1266,108 +1141,117 @@ Assigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
       }
     };
 
-    // DOM Elements
-    const docSelector = document.getElementById('docSelector');
-    const originalTextContent = document.getElementById('originalTextContent');
-    const sanitizedTextContent = document.getElementById('sanitizedTextContent');
-    const gateBanner = document.getElementById('gateBanner');
-    const gateBadge = document.getElementById('gateBadge');
-    const gateTitle = document.getElementById('gateTitle');
-    const gateMessage = document.getElementById('gateMessage');
-    const metricDocType = document.getElementById('metricDocType');
-    const metricPiiCount = document.getElementById('metricPiiCount');
-    const metricStructure = document.getElementById('metricStructure');
-    const metricLeaks = document.getElementById('metricLeaks');
-    const downloadSanitizedBtn = document.getElementById('downloadSanitizedBtn');
+    const docKeys = ['org_pack', 'risk_policy', 'tprm'];
+    let currentDocIndex = 0;
 
-    // Load Sample Document
-    function loadSample(key) {
-      const data = SAMPLES[key] || SAMPLES.org_pack;
-      docSelector.value = key;
-      metricDocType.textContent = data.docType;
-      metricPiiCount.textContent = data.piiCount;
-      metricStructure.textContent = data.structure;
-      metricLeaks.textContent = data.leaks;
-      originalTextContent.textContent = data.original;
-      sanitizedTextContent.textContent = data.sanitized;
+    // Sidebar Toggle
+    const appSidebar = document.getElementById('appSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const menuIcon = document.getElementById('menuIcon');
+
+    function toggleSidebar(forceState) {
+      const isOpen = forceState !== undefined ? forceState : !appSidebar.classList.contains('open');
+      appSidebar.classList.toggle('open', isOpen);
+      sidebarOverlay.classList.toggle('active', isOpen);
       
-      setGateStatus(data.status, data.title, data.msg);
-      returnToDashboard();
-    }
-
-    // Set Gate Status Banner State
-    function setGateStatus(status, title, message) {
-      const gateDot = document.getElementById('gateDot');
-      const gateBadgeText = document.getElementById('gateBadgeText');
-      if (status === 'approved') {
-        gateBanner.className = 'gate-status-banner approved';
-        if (gateDot) gateDot.className = 'badge-dot dot-success';
-        if (gateBadgeText) gateBadgeText.textContent = 'APPROVED';
-        gateTitle.textContent = title || 'SAFE FOR DOWNSTREAM LLM INGESTION';
-        gateMessage.textContent = message || 'Zero residual PII detected post-redaction.';
-        downloadSanitizedBtn.disabled = false;
-        downloadSanitizedBtn.style.opacity = '1';
-        downloadSanitizedBtn.style.cursor = 'pointer';
+      // Update Button27 Icon between FiMenu and FiX
+      if (isOpen) {
+        menuIcon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
       } else {
-        gateBanner.className = 'gate-status-banner quarantined';
-        if (gateDot) gateDot.className = 'badge-dot dot-danger';
-        if (gateBadgeText) gateBadgeText.textContent = 'QUARANTINED';
-        gateTitle.textContent = title || 'SECURITY GATE VIOLATION — ACCESS BLOCKED';
-        gateMessage.textContent = message || 'Potential residual PII leak or incomplete extraction detected.';
-        downloadSanitizedBtn.disabled = true;
-        downloadSanitizedBtn.style.opacity = '0.5';
-        downloadSanitizedBtn.style.cursor = 'not-allowed';
+        menuIcon.innerHTML = '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
       }
     }
 
-    // Document Selector Change
-    docSelector.addEventListener('change', (e) => {
-      loadSample(e.target.value);
-      showToast(`Loaded ${docSelector.options[docSelector.selectedIndex].text}`, 'success');
-    });
+    // Load Document Sample
+    function loadSample(key) {
+      const data = SAMPLES[key] || SAMPLES.org_pack;
+      currentDocIndex = docKeys.indexOf(key);
+      if (currentDocIndex === -1) currentDocIndex = 0;
 
-    // Run Pipeline Button
-    document.getElementById('runPipelineBtn').addEventListener('click', () => {
-      loadSample(docSelector.value);
-      showToast('Pipeline executed: 0 residual leaks found. Document APPROVED.', 'success');
-    });
+      document.getElementById('metricDocType').textContent = data.docType;
+      document.getElementById('metricPiiCount').textContent = data.piiCount;
+      document.getElementById('metricStructure').textContent = data.structure;
+      document.getElementById('metricLeaks').textContent = data.leaks;
+      document.getElementById('originalTextContent').textContent = data.original;
+      document.getElementById('sanitizedTextContent').textContent = data.sanitized;
 
-    // Simulate Leakage Button (Tests Gate Quarantine)
-    document.getElementById('simulateLeakBtn').addEventListener('click', () => {
-      originalTextContent.textContent = "Leaked Customer Record: Contact Robert Chen (robert.chen@cadence.com) or +1 (555) 0199.";
-      sanitizedTextContent.textContent = "Leaked Customer Record: Contact [PERSON_1] (robert.chen@cadence.com) or +1 (555) 0199.";
-      metricLeaks.textContent = "2";
+      setGateStatus(data.status, data.title, data.msg);
+    }
+
+    // Navigate Prev / Next (Button2)
+    function navigateDoc(direction) {
+      currentDocIndex = (currentDocIndex + direction + docKeys.length) % docKeys.length;
+      const key = docKeys[currentDocIndex];
+      loadSample(key);
+      showToast(`Navigated to ${SAMPLES[key].docType} evidence partition`, 'success');
+    }
+
+    // Set Gate Status
+    function setGateStatus(status, title, message) {
+      const banner = document.getElementById('gateBanner');
+      const dot = document.getElementById('gateDot');
+      const text = document.getElementById('gateBadgeText');
+      const h3 = document.getElementById('gateTitle');
+      const p = document.getElementById('gateMessage');
+      const dlBtn = document.getElementById('downloadSanitizedBtn');
+
+      if (status === 'approved') {
+        banner.className = 'gate-status-banner approved';
+        dot.className = 'badge-dot dot-success';
+        text.textContent = 'APPROVED';
+        h3.textContent = title || 'SAFE FOR DOWNSTREAM LLM INGESTION';
+        p.textContent = message || 'Zero residual PII detected post-redaction.';
+        dlBtn.disabled = false;
+        dlBtn.style.opacity = '1';
+        dlBtn.style.cursor = 'pointer';
+      } else {
+        banner.className = 'gate-status-banner quarantined';
+        dot.className = 'badge-dot dot-danger';
+        text.textContent = 'QUARANTINED';
+        h3.textContent = title || 'SECURITY GATE VIOLATION — ACCESS BLOCKED';
+        p.textContent = message || 'Potential residual PII leak or incomplete extraction detected.';
+        dlBtn.disabled = true;
+        dlBtn.style.opacity = '0.5';
+        dlBtn.style.cursor = 'not-allowed';
+      }
+    }
+
+    // Stress Simulations
+    function simulateLeakage() {
+      document.getElementById('originalTextContent').textContent = "Leaked Customer Record: Contact Robert Chen (robert.chen@cadence.com) or +1 (555) 0199.";
+      document.getElementById('sanitizedTextContent').textContent = "Leaked Customer Record: Contact [PERSON_1] (robert.chen@cadence.com) or +1 (555) 0199.";
+      document.getElementById('metricLeaks').textContent = "2";
       setGateStatus('quarantined', 'QUARANTINED: RESIDUAL PII PATTERN DETECTED', 'Secondary verification gate intercepted unredacted email and phone number.');
       showToast('⚠️ Security Violation Detected: Output quarantined to prevent LLM leak!', 'error');
-    });
+    }
 
-    // Simulate OCR Failure Button
-    document.getElementById('simulateOcrFailureBtn').addEventListener('click', () => {
-      originalTextContent.textContent = "[OCR SCAN ERROR: Page 14 unreadable due to low contrast / 42 DPI image resolution].";
-      sanitizedTextContent.textContent = "[QUARANTINED: Incomplete extraction prevented safe tokenization].";
-      metricLeaks.textContent = "1";
+    function simulateOcrFailure() {
+      document.getElementById('originalTextContent').textContent = "[OCR SCAN ERROR: Page 14 unreadable due to low contrast / 42 DPI image resolution].";
+      document.getElementById('sanitizedTextContent').textContent = "[QUARANTINED: Incomplete extraction prevented safe tokenization].";
+      document.getElementById('metricLeaks').textContent = "1";
       setGateStatus('quarantined', 'QUARANTINED: INCOMPLETE OCR COVERAGE', 'Upstream OCR adapter flagged incomplete extraction. Forwarding to human review.');
       showToast('🛑 Quality Gate Triggered: Low OCR confidence quarantined!', 'error');
-    });
+    }
 
-    // Reset Button
-    document.getElementById('resetPipelineBtn').addEventListener('click', () => {
+    // Purge Memory (Button35 Delete)
+    function purgeMemoryCache() {
       loadSample('org_pack');
-      showToast('Dashboard reset to clean default state.', 'success');
-    });
+      showToast('Purged session cache. Reset to clean baseline.', 'success');
+    }
 
-    // Download File Handler
+    // Download Sanitized Text (Button14)
     function downloadSanitizedFile() {
-      if (downloadSanitizedBtn.disabled) {
+      const dlBtn = document.getElementById('downloadSanitizedBtn');
+      if (dlBtn.disabled) {
         showToast('Download blocked: Document is quarantined!', 'error');
         return;
       }
-      const text = sanitizedTextContent.textContent;
+      const text = document.getElementById('sanitizedTextContent').textContent;
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `cadence_sanitized_${docSelector.value}.txt`;
+      a.download = `cadence_sanitized_${docKeys[currentDocIndex]}.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1375,25 +1259,25 @@ Assigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
       showToast('Sanitized document downloaded successfully.', 'success');
     }
 
-    // Copy to Clipboard with Feedback
+    // Copy to Clipboard
     function copyText(elementId, label) {
       const text = document.getElementById(elementId).textContent;
       navigator.clipboard.writeText(text).then(() => {
         showToast(`${label} copied to clipboard!`, 'success');
-      }).catch(() => {
-        showToast('Failed to copy to clipboard', 'error');
       });
     }
 
-    // Toast Notification System
+    // Update Slider
+    function updateSliderVal(val) {
+      document.getElementById('sliderVal').textContent = `${val}%`;
+    }
+
+    // Toast Notification
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
-      
-      const icon = type === 'success' ? '✅' : '⛔';
-      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-      
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '⛔'}</span> <span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => {
         toast.style.opacity = '0';
@@ -1403,75 +1287,21 @@ Assigned Tier: Tier 2 Critical Provider (Ironclad / OneTrust integration).`,
       }, 3500);
     }
 
-    // Theme Toggle (Dark & Light Mode)
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    const themeIcon = document.getElementById('themeIcon');
-    
-    // Check saved theme
+    // Rock-Solid Dark/Light Mode Push-Button Switcher
+    function setAppTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.body.setAttribute('data-theme', theme);
+      localStorage.setItem('cadence_theme', theme);
+
+      // Update segmented push buttons
+      document.getElementById('themeSegmentLight').classList.toggle('active', theme === 'light');
+      document.getElementById('themeSegmentDark').classList.toggle('active', theme === 'dark');
+      showToast(`Switched to ${theme === 'dark' ? 'Dark' : 'Light'} appearance`, 'success');
+    }
+
+    // Init Theme
     const savedTheme = localStorage.getItem('cadence_theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
-    themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-    themeToggleBtn.addEventListener('click', () => {
-      const current = document.body.getAttribute('data-theme');
-      const nextTheme = current === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', nextTheme);
-      themeIcon.textContent = nextTheme === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('cadence_theme', nextTheme);
-      showToast(`Switched to ${nextTheme === 'dark' ? 'Dark' : 'Light'} Mode`, 'success');
-    });
-
-    // Mobile Menu Drawer Toggle
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
-
-    mobileMenuBtn.addEventListener('click', () => {
-      mobileMenuDrawer.classList.toggle('open');
-    });
-
-    function closeMobileMenu() {
-      mobileMenuDrawer.classList.remove('open');
-    }
-
-    // Custom 404 Route Handler
-    const view404 = document.getElementById('view404');
-    const dashboardView = document.getElementById('dashboardView');
-
-    function trigger404View() {
-      dashboardView.style.display = 'none';
-      view404.classList.add('active');
-      window.location.hash = '404';
-      showToast('Custom 404: Route not recognized', 'error');
-    }
-
-    function returnToDashboard() {
-      view404.classList.remove('active');
-      dashboardView.style.display = 'grid';
-      window.location.hash = 'demo';
-    }
-
-    document.getElementById('nav404Link').addEventListener('click', (e) => {
-      e.preventDefault();
-      trigger404View();
-    });
-
-    document.getElementById('brandLogoBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      returnToDashboard();
-    });
-
-    // Check URL Hash on Load
-    window.addEventListener('hashchange', () => {
-      if (window.location.hash === '#404') {
-        trigger404View();
-      } else {
-        returnToDashboard();
-      }
-    });
-
-    if (window.location.hash === '#404') {
-      trigger404View();
-    }
+    setAppTheme(savedTheme);
   </script>
 </body>
 </html>
