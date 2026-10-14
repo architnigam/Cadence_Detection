@@ -210,6 +210,32 @@ class UploadServerTests(unittest.TestCase):
         self.assertEqual(json.load(self.request('/health'))['status'],'ok')
         html=self.request('/').read().decode();self.assertIn('id="file"',html);self.assertIn('id="run"',html);self.assertIn(self.server.token,html)
 
+    def test_upload_capacity_reuses_completed_results_and_reports_busy(self):
+        headers = {'X-Cadence-Token': self.server.token}
+        with self.server.lock:
+            saved = self.server.jobs.copy()
+        try:
+            with patch.object(self.server, 'process'):
+                for state in ('failed', 'running'):
+                    with self.server.lock:
+                        self.server.jobs.clear()
+                        for index in range(8):
+                            self.server.jobs[str(index)] = {'state': state, 'created': time.time()}
+                    if state == 'failed':
+                        job = json.load(self.request('/api/jobs?filename=test.pdf', b'x'*200000, headers))
+                        self.assertIn(job['job_id'], self.server.jobs)
+                        self.assertNotIn('0', self.server.jobs)
+                        self.assertEqual(len(self.server.jobs), 8)
+                    else:
+                        with self.assertRaises(HTTPError) as caught:
+                            self.request('/api/jobs?filename=test.pdf', b'x'*200000, headers)
+                        self.assertEqual(caught.exception.code, 429)
+                        self.assertIn('busy', json.load(caught.exception)['error'])
+        finally:
+            with self.server.lock:
+                self.server.jobs.clear()
+                self.server.jobs.update(saved)
+
     def test_unauthorized_and_cross_origin_rejected(self):
         for headers in [{},{'X-Cadence-Token':self.server.token,'Origin':'http://evil.invalid'}]:
             with self.subTest(headers=bool(headers)):

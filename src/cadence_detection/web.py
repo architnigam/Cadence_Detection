@@ -101,15 +101,20 @@ class Handler(BaseHTTPRequestHandler):
         if not 0<length<=50*1024*1024:return self.reply({'error':'Choose a nonempty file up to 50 MB'},413)
         filename=parse_qs(path.query).get('filename',['upload'])[0]
         filename=Path(filename.replace('\\','/')).name[:200]
+        # Consume an accepted-size request before replying, including capacity
+        # errors: closing with unread upload bytes can reset browser connections.
+        data=self.rfile.read(length)
+        if len(data)!=length:return self.reply({'error':'Incomplete upload'},400)
         with self.server.lock:
             for key in list(self.server.jobs):
                 if self.server.jobs[key]['state'] in ('finished','failed') and time.time()-self.server.jobs[key]['created']>1200:
                     del self.server.jobs[key]
-            if len(self.server.jobs)>=8:return self.reply({'error':'Session capacity reached; restart to clear local jobs'},429)
-        data=self.rfile.read(length)
-        if len(data)!=length:return self.reply({'error':'Incomplete upload'},400)
-        jid=secrets.token_hex(16)
-        with self.server.lock:self.server.jobs[jid]={'state':'running','stage':'Validating file','created':time.time()}
+            while len(self.server.jobs)>=8:
+                completed=next((key for key,job in self.server.jobs.items() if job['state'] in ('finished','failed')),None)
+                if completed is None:return self.reply({'error':'All review slots are busy. Wait for a review to finish and try again.'},429)
+                del self.server.jobs[completed]
+            jid=secrets.token_hex(16)
+            self.server.jobs[jid]={'state':'running','stage':'Validating file','created':time.time()}
         self.server.workers.submit(self.server.process,jid,data,filename)
         return self.reply({'job_id':jid},202)
 
