@@ -334,7 +334,10 @@ class PipelineOrchestrator:
         if not rescan_res or not rescan_res.rescan_passed or rescan_res.residual_candidates_count > 0:
             quarantine_reasons.append(QuarantineReason.RESCAN_FAILED)
             cnt = rescan_res.residual_candidates_count if rescan_res else "unknown"
-            errors.append(f"Rescan privacy gate failed: {cnt} residual PII candidate(s) detected.")
+            if cnt == 0:
+                errors.append("Release checks require review despite zero residual PII candidates; extraction or detection coverage may be incomplete.")
+            else:
+                errors.append(f"Rescan privacy gate failed: {cnt} residual PII candidate(s) detected.")
             return self._build_quarantine_response(manifest, quarantine_reasons, errors, start_time)
 
         # Placeholder adapters are useful for wiring tests, but they do not

@@ -429,6 +429,32 @@ class ExtractionTests(unittest.TestCase):
         c.textAnnotation("Hidden contact", Rect=(50, 500, 100, 550)); c.save()
         self.assertIn("PDF_ANNOTATIONS", self.codes(self.extract(p)))
 
+    def test_pdf_glyph_rectangles_preserve_contact_context(self):
+        p = self.root/"glyphs.pdf"
+        c = Canvas(str(p))
+        lines = ["Full Name: Alex Example", "Phone Number: +91 9876543210", "Email Address: alex@example.test"]
+        for row, line in enumerate(lines):
+            x = 40
+            for character in line:
+                c.drawString(x, 700 - row * 20, character)
+                x += c.stringWidth(character, "Helvetica", 12)
+        c.save()
+        result = self.extract(p)
+        blocks = [b for b in result.blocks if b.source_kind == "pdf_text"]
+        self.assertEqual(len(blocks), 1)
+        for line in lines:
+            self.assertIn(line, blocks[0].text)
+        self.assertTrue(result.extraction_complete)
+
+    def test_pdf_uri_link_target_extracted(self):
+        p = self.root/"link.pdf"
+        c = Canvas(str(p)); c.drawString(50, 700, "Contact")
+        c.linkURL("mailto:alex@example.test", (50, 690, 100, 710)); c.save()
+        result = self.extract(p)
+        self.assertTrue(result.extraction_complete)
+        self.assertNotIn("PDF_ANNOTATIONS", self.codes(result))
+        self.assertIn("mailto:alex@example.test", [b.text for b in result.blocks if b.source_kind == "pdf_link"])
+
     def test_pdf_attachment_flagged(self):
         reader = PdfReader(self.pdf()); w = PdfWriter(); w.append(reader); w.add_attachment("secret.txt", b"Contact")
         p = self.root/"attached.pdf"

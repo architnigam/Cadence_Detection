@@ -54,6 +54,29 @@ class DetectorIntegrationTests(unittest.TestCase):
         text='OneTrust and Ironclad support Tier 2 reviews every 24 months. Policy GRP-POL-001, DDQ-004, USD 2.4m and 11 March 2026 are business context.'
         self.assertEqual(self.detector.detect_blocks([DBlock('d','b',text)]),[])
 
+    def test_pdf_software_producer_is_not_a_person(self):
+        text = 'Skia/PDF m157 Google Docs Renderer'
+        self.assertEqual(self.detector.detect_blocks([DBlock('d','b',text)]), [])
+        text += '\nFull Name: Alex Example'
+        self.assertIn('PERSON', {f.entity_type for f in self.detector.detect_blocks([DBlock('d','b',text)])})
+
+    def test_repeated_email_counts_as_one_distinct_detail(self):
+        from reportlab.pdfgen.canvas import Canvas
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'contact.pdf'
+            canvas = Canvas(str(path))
+            canvas.drawString(40, 700, 'Full Name: Alex Example')
+            canvas.drawString(40, 680, 'Phone Number: +91 9876543210')
+            canvas.drawString(40, 660, 'Email Address: alex@example.test')
+            canvas.linkURL('mailto:alex@example.test', (40, 650, 200, 670))
+            canvas.save()
+            response, ctx = process_document(path)
+        self.assertEqual(response.summary['distinct_category_counts'], {'EMAIL': 1, 'PERSON': 1, 'PHONE': 1})
+        self.assertEqual(response.summary['distinct_details'], 3)
+        self.assertEqual(response.summary['masked_ranges'], 4)
+        self.assertGreaterEqual(response.summary['detected_occurrences'], 4)
+        self.assertEqual(ctx.gate.status, 'APPROVED')
+
     def test_workflow_labels_are_not_people(self):
         labels=['Full Admin','Edit Access','Due Diligence Questionnaire','Create Risk','Default Onboarding Workflow','Assessment Submitted','Tier 1']
         for label in labels:

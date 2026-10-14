@@ -36,8 +36,23 @@ def extract_pdf(path, result, options, ocr):
             n = index+1; location = f"pdf:page:{n}"
             unit = {"index": n, "location": location, "processed": False, "method": "pending"}
             result.units.append(unit)
-            if source.get("/Annots"):
-                result.issue("PDF_ANNOTATIONS", "Annotations may contain extra text or cover content; review required", location)
+            for annotation_index, reference in enumerate(source.get("/Annots", []), 1):
+                annotation = reference.get_object()
+                action = annotation.get("/A")
+                action = action.get_object() if action else {}
+                # Only ordinary URI links are fully handled here. Rich annotations,
+                # appearance streams and other actions still require review.
+                ordinary_link = (
+                    annotation.get("/Subtype") == "/Link"
+                    and set(annotation) <= {"/Type", "/Subtype", "/Rect", "/F", "/Border", "/BS", "/C", "/H", "/A", "/StructParent", "/P"}
+                    and action.get("/S") == "/URI"
+                    and set(action) <= {"/Type", "/S", "/URI", "/IsMap"}
+                    and isinstance(action.get("/URI"), str)
+                )
+                if ordinary_link:
+                    result.add(action["/URI"], "pdf_link", f"{location}:link:{annotation_index}", n)
+                else:
+                    result.issue("PDF_ANNOTATIONS", "Annotations may contain extra text or cover content; review required", location)
             page = document[index]
             bitmap = None
             try:
@@ -49,13 +64,18 @@ def extract_pdf(path, result, options, ocr):
                     if native.strip():
                         unit["method"] = "native+image_audit"
                         count = textpage.count_rects()
-                        for j in range(count):
-                            left, bottom, right, top = textpage.get_rect(j)
-                            text = textpage.get_text_bounded(left, bottom, right, top)
-                            result.add(text, "pdf_text", f"{location}:rect:{j+1}", n,
+                        if count:
+                            rectangles = [textpage.get_rect(j) for j in range(count)]
+                            left = min(r[0] for r in rectangles)
+                            bottom = min(r[1] for r in rectangles)
+                            right = max(r[2] for r in rectangles)
+                            top = max(r[3] for r in rectangles)
+                            # Rectangles can be individual glyphs (Google Docs PDFs).
+                            # Keep PDFium's complete text and offsets for detection.
+                            result.add(native, "pdf_text", location, n,
                                        bbox=[left, height-top, right, height-bottom],
                                        coordinate_space="pdf_points_top_left_unrotated",
-                                       attributes={"page_rotation": rotation, "order_basis": "pdf_text_object_order"})
+                                       attributes={"page_rotation": rotation, "order_basis": "pdf_text_object_order", "bbox_scope": "page_text"})
                         if count == 0:
                             result.add(native, "pdf_text", location, n)
                             result.issue("PDF_TEXT_LOCATION", "Native text has no rectangle mapping", location)

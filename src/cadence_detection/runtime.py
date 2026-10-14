@@ -5,6 +5,7 @@ from collections import Counter
 from dataclasses import asdict
 import hashlib
 import json
+import re
 from pathlib import Path
 import tempfile
 
@@ -103,6 +104,13 @@ def process_document(source,*,filename=None,options=None,ocr=None,progress=None)
         response=engine.process_file(source,filename)
         response.summary.update({'detected_occurrences':len(ctx.findings),'masked_ranges':sum(ctx.categories.values()),
                                  'category_counts':ctx.categories,'local_ner_available':ctx.detector.ner_available})
+        tokens = set(token for block in ctx.preview for token in re.findall(r'\[([A-Z_]+)_\d+\]', block.text))
+        distinct_tokens = set(token for block in ctx.preview for token in re.findall(r'\[([A-Z_]+_\d+)\]', block.text))
+        response.summary['distinct_details'] = len(distinct_tokens)
+        response.summary['distinct_category_counts'] = {
+            kind: sum(token.rsplit('_', 1)[0] == kind for token in distinct_tokens)
+            for kind in sorted(tokens)
+        }
         if ctx.extraction: response.summary['extraction_coverage']=ctx.extraction.to_dict()['coverage']
         response.audit_report['scope']='Sanitized plain text only; original files and visual regions are not exported.'
         response.audit_report['guarantee']='Configured checks only; independent source review remains necessary.'

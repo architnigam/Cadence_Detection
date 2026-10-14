@@ -40,6 +40,7 @@ BUSINESS_WORDS = set('Risk Management Group Financial Cadence Financial Group On
 BUSINESS_WORDS.update('Full Admin Edit Access Create Configure Questionnaire Due Diligence Template Workflow Vendor Third Party Parties Legal Procurement Marketing Revenue International Staffing Standard Renewal Offboarding Assessment Rules Rule Condition Trigger Response Action Approve Approved Reject Rejected Task Stage Details Section Description Type Users User Team View Save Publish New Onboarding Completed Submitted Read Only General Country Certification Background Breach Notification Retention Encryption Required Optional Attribute Values Value Submit Scoring Score Default Schedule SLA Question Questions Reminder System And To For Of In From With'.split())
 BUSINESS_WORDS={word.casefold() for word in BUSINESS_WORDS}
 PERSON_CONTEXT = re.compile(r'(?i)\b(?:name|employee|customer|reviewer|officer|manager|owner|assignee|author|prepared by|approved by|accepted by|dear|led by|contact)\s*[:=-]?\s*$')
+PDF_SOFTWARE_SIGNATURE = re.compile(r'Skia/PDF m\d+ Google Docs Renderer')
 
 
 def luhn(value):
@@ -99,6 +100,11 @@ class ComprehensiveDetector:
             with self._lock:
                 for i,doc in enumerate(self._nlp.pipe((str(b.text) for b in blocks),batch_size=64)):
                     ner_entities[i]=[(e.start_char,e.end_char) for e in doc.ents if e.label_=='PERSON']
+        for i,b in enumerate(blocks):
+            # This exact producer signature is software, not a person's name.
+            # Do not suppress author metadata or arbitrary text appended to it.
+            if PDF_SOFTWARE_SIGNATURE.fullmatch(b.text.strip()):
+                ner_entities[i]=[]
         lexicon=set()
         for i,b in enumerate(blocks):
             for start,end in ner_entities[i]:
