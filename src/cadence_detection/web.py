@@ -116,7 +116,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def serve(host='127.0.0.1',port=8501):
     server=LocalServer((host,port))
-    print(f'Cadence local application: http://{host}:{server.server_port}',flush=True)
+    print(f'Caddet local application: http://{host}:{server.server_port}',flush=True)
     try:server.serve_forever()
     except KeyboardInterrupt:pass
     finally:server.server_close()
